@@ -1,0 +1,382 @@
+<title>공무원 운동 처방전</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@300;400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #F7F3EA; --surface: #FFFCF5; --panel: #FFFFFF;
+    --line: #E0D9C6; --line-strong: #C9BFA5;
+    --brass: #8A6B1F; --brass-bright: #A8842C;
+    --text: #16150F; --muted: #6B6454;
+    --serif: "Gowun Batang", "Nanum Myeongjo", "Apple SD Gothic Neo", serif;
+    --sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --mono: "IBM Plex Mono", Menlo, monospace;
+    --pad: clamp(18px, 4vw, 44px);
+  }
+  :root:not([data-theme="light"]) { color-scheme: light dark; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14130F; --surface: #1C1A15; --panel: #201E18;
+      --line: #2E2B23; --line-strong: #46412F;
+      --brass: #C8A24A; --brass-bright: #E3C57F;
+      --text: #F3EFE4; --muted: #A39C8B;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14130F; --surface: #1C1A15; --panel: #201E18;
+    --line: #2E2B23; --line-strong: #46412F;
+    --brass: #C8A24A; --brass-bright: #E3C57F;
+    --text: #F3EFE4; --muted: #A39C8B;
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-weight: 300; font-size: 16.5px; line-height: 1.75; -webkit-font-smoothing: antialiased; }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 700; margin: 0; text-wrap: balance; }
+  a { color: var(--brass); }
+  :focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding-inline: var(--pad); }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--brass); margin: 0; }
+
+  header.top { border-bottom: 1px solid var(--line); background: var(--surface); padding-block: clamp(34px, 6vw, 62px); }
+  header.top h1 { font-size: clamp(34px, 6vw, 58px); line-height: 1.15; margin-block: 12px 14px; }
+  header.top h1 em { font-style: normal; color: var(--brass); }
+  header.top p { margin: 0; color: var(--muted); max-width: 60ch; }
+  .stamp { display: inline-flex; align-items: center; gap: 8px; margin-top: 22px; font-family: var(--mono); font-size: 12px; letter-spacing: .1em; color: var(--brass); border: 1px solid var(--brass); border-radius: 2px; padding: 8px 14px; }
+
+  main { padding-block: clamp(30px, 5vw, 54px) clamp(50px, 8vw, 90px); }
+  .layout { display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); gap: clamp(22px, 3vw, 40px); align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+  form { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: clamp(20px, 3vw, 28px); position: sticky; top: 20px; }
+  @media (max-width: 900px) { form { position: static; } }
+  form h2 { font-size: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--brass); margin-bottom: 18px; }
+  .field { display: grid; gap: 6px; margin-bottom: 16px; }
+  .field label { font-family: var(--mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .field input, .field select {
+    font-family: var(--sans); font-size: 16px; color: var(--text); background: var(--panel);
+    border: 1px solid var(--line-strong); border-radius: 3px; padding: 11px 12px; width: 100%;
+  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .btn { font-family: var(--sans); font-size: 16px; font-weight: 500; width: 100%; padding: 15px; border-radius: 3px; border: 1px solid var(--brass); background: var(--brass); color: var(--bg); cursor: pointer; transition: background-color .18s ease; }
+  .btn:hover { background: var(--brass-bright); border-color: var(--brass-bright); }
+  .btn.ghost { background: transparent; color: var(--brass); margin-top: 10px; }
+  .btn.ghost:hover { background: var(--brass); color: var(--bg); }
+  .hint { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+
+  /* 처방전 */
+  .rx { background: var(--panel); border: 1px solid var(--line-strong); border-radius: 4px; overflow: hidden; }
+  .rx-head { padding: clamp(20px, 3vw, 30px); border-bottom: 2px solid var(--brass); display: flex; flex-wrap: wrap; gap: 14px 26px; align-items: flex-end; justify-content: space-between; }
+  .rx-head h2 { font-size: clamp(24px, 3.4vw, 32px); }
+  .rx-head .sub { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; color: var(--muted); margin-top: 6px; }
+  .rx-head .badge { font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em; color: var(--brass); border: 1px solid var(--brass); border-radius: 2px; padding: 6px 10px; }
+  .rx-body { padding: clamp(20px, 3vw, 30px); display: grid; gap: clamp(26px, 3.4vw, 38px); }
+  .block > h3 { font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: var(--brass); padding-bottom: 9px; border-bottom: 1px solid var(--line-strong); margin-bottom: 16px; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
+  .stat { background: var(--surface); padding: 16px 18px; }
+  .stat b { display: block; font-family: var(--serif); font-size: 26px; color: var(--brass); line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .stat span { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; color: var(--muted); }
+
+  .weeks { display: grid; gap: 14px; }
+  .week { border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
+  .week-head { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; background: var(--surface); padding: 12px 18px; border-bottom: 1px solid var(--line); }
+  .week-head b { font-family: var(--serif); font-size: 18px; }
+  .week-head span { font-size: 14px; color: var(--muted); }
+  .week-body { padding: 6px 18px 16px; }
+  .day { padding: 12px 0; border-bottom: 1px dashed var(--line); }
+  .day:last-child { border-bottom: 0; }
+  .day .day-name { font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em; color: var(--brass); }
+  .day h4 { font-family: var(--sans); font-weight: 500; font-size: 16.5px; margin: 3px 0 8px; }
+  .ex { display: grid; grid-template-columns: 1fr auto; gap: 10px; font-size: 15px; padding: 3px 0; color: var(--muted); }
+  .ex b { font-weight: 400; color: var(--text); }
+  .vid { display: inline-block; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; color: var(--brass); border: 1px solid var(--brass); border-radius: 999px; padding: 1px 8px; margin-left: 6px; text-decoration: none; vertical-align: middle; transition: background-color .15s ease, color .15s ease; }
+  .vid:hover { background: var(--brass); color: var(--bg); }
+  @media print { .vid { display: none; } }
+  .ex .sets { font-family: var(--mono); font-size: 13.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .table-wrap { overflow-x: auto; }
+  th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line); }
+  th { font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .tips { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; }
+  .tips li { padding-left: 22px; position: relative; color: var(--muted); }
+  .tips li::before { content: "—"; position: absolute; left: 0; color: var(--brass); }
+  .tips li b { color: var(--text); font-weight: 500; }
+
+  .cta { background: var(--surface); border: 1px solid var(--line-strong); border-left: 3px solid var(--brass); border-radius: 3px; padding: 22px clamp(18px, 3vw, 26px); display: grid; gap: 14px; }
+  .cta strong { font-family: var(--serif); font-size: 20px; color: var(--brass); }
+  .cta .btns { display: flex; flex-wrap: wrap; gap: 10px; }
+  .cta a { font-size: 15px; font-weight: 500; text-decoration: none; padding: 12px 22px; border-radius: 2px; border: 1px solid var(--brass); color: var(--brass); }
+  .cta a.solid { background: var(--brass); color: var(--bg); }
+
+  .caution { font-size: 13.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+  footer { border-top: 1px solid var(--line); padding-block: 30px 44px; color: var(--muted); font-size: 14px; }
+  footer a { text-decoration: none; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  @media print {
+    form, footer, .cta .btns { display: none; }
+    body { background: #fff; color: #000; }
+    .layout { grid-template-columns: 1fr; }
+  }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">팀보노짐 · 수원 권선동 24시간 헬스장</p>
+    <h1>앉아서 일하는 사람을 위한<br><em>운동 처방전</em></h1>
+    <p>하루 여덟 시간 책상에 앉아 있는 공무원과 직장인을 위해, 17년 경력 트레이너가 쓰는 방식 그대로 4주 운동 루틴과 식단 기준을 만들어 드립니다. 키와 나이, 운동 경력, 일주일에 낼 수 있는 시간만 적으면 됩니다.</p>
+    <div class="stamp">처방 · 팀보노짐 박찬웅</div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap layout">
+    <form id="rx-form" autocomplete="off">
+      <h2>문진표</h2>
+      <div class="row2">
+        <div class="field">
+          <label for="sex">성별</label>
+          <select id="sex"><option value="m">남성</option><option value="f">여성</option></select>
+        </div>
+        <div class="field">
+          <label for="age">나이</label>
+          <input id="age" type="number" min="15" max="80" value="42" inputmode="numeric">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="height">키 (cm)</label>
+          <input id="height" type="number" min="130" max="210" value="175" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label for="weight">몸무게 (kg)</label>
+          <input id="weight" type="number" min="35" max="180" value="78" inputmode="numeric">
+        </div>
+      </div>
+      <div class="field">
+        <label for="exp">운동 경력</label>
+        <select id="exp">
+          <option value="none">처음이거나 3개월 미만</option>
+          <option value="beginner" selected>헬스 1년 미만</option>
+          <option value="mid">1~3년</option>
+          <option value="adv">3년 이상</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="days">일주일에 운동 가능한 횟수</label>
+        <select id="days">
+          <option value="2">주 2회</option>
+          <option value="3" selected>주 3회</option>
+          <option value="4">주 4회</option>
+          <option value="5">주 5회</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="goal">목표</label>
+        <select id="goal">
+          <option value="fat" selected>체지방 줄이기</option>
+          <option value="muscle">근육량 늘리기</option>
+          <option value="health">체력과 자세 관리</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="sit">하루 앉아 있는 시간</label>
+        <select id="sit">
+          <option value="6">6시간 이하</option>
+          <option value="8" selected>7~9시간</option>
+          <option value="10">10시간 이상</option>
+        </select>
+      </div>
+      <button class="btn" type="submit">처방전 발급</button>
+      <button class="btn ghost" type="button" id="print">인쇄 · PDF로 저장</button>
+      <p class="hint">입력한 내용은 이 화면에서만 계산되고 저장되지 않습니다.</p>
+    </form>
+
+    <article class="rx" id="rx">
+      <!-- 스크립트가 채웁니다 -->
+    </article>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p style="margin:0">팀보노짐 · 경기 수원시 권선구 세권로195번길 33, 201호 · <a href="tel:0312217522">031-221-7522</a> · 24시간 연중무휴</p>
+    <p style="margin:6px 0 0">단체 · 기관 운동 강의 문의 <a href="mailto:cw7232@naver.com">cw7232@naver.com</a></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var EX = {
+    lower: [['레그 프레스', 'legs'], ['스미스 스쿼트', 'legs'], ['루마니안 데드리프트', 'legs'], ['레그 컬', 'legs'], ['레그 익스텐션', 'legs'], ['카프 레이즈', 'legs']],
+    push: [['체스트 프레스 머신', 'push'], ['인클라인 덤벨 프레스', 'push'], ['숄더 프레스 머신', 'push'], ['케이블 트라이셉스 푸시다운', 'push'], ['사이드 레터럴 레이즈', 'push']],
+    pull: [['랫 풀다운', 'pull'], ['시티드 케이블 로우', 'pull'], ['원암 덤벨 로우', 'pull'], ['페이스 풀', 'pull'], ['덤벨 컬', 'pull']],
+    core: [['플랭크 40초', 'core'], ['데드버그 좌우 10회', 'core'], ['버드독 좌우 10회', 'core'], ['사이드 플랭크 30초', 'core']]
+  };
+  // 운동별 영상 링크. 팀보노짐 채널 영상 주소를 넣으면 그 영상으로, 비어 있으면 유튜브 검색으로 연결됩니다.
+  var VIDEO = {
+    '레그 프레스': '', '스미스 스쿼트': '', '루마니안 데드리프트': '', '레그 컬': '', '레그 익스텐션': '', '카프 레이즈': '',
+    '체스트 프레스 머신': '', '인클라인 덤벨 프레스': '', '숄더 프레스 머신': '', '케이블 트라이셉스 푸시다운': '', '사이드 레터럴 레이즈': '',
+    '랫 풀다운': '', '시티드 케이블 로우': '', '원암 덤벨 로우': '', '페이스 풀': '', '덤벨 컬': ''
+  };
+  var CHANNEL = 'https://www.youtube.com/@unsik_diet';
+  function videoUrl(name) {
+    var clean = name.replace(/\s*\d+초|\s*좌우.*$/, '').trim();
+    if (VIDEO[clean]) return VIDEO[clean];
+    return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(clean + ' 운동 자세');
+  }
+  var DESK = ['흉추 회전 스트레칭 좌우 10회', '고관절 굴곡근 스트레칭 좌우 30초', '턱 당기기(목 깊은굽힘근) 10회', '광배 스트레칭 좌우 30초'];
+
+  function pick(arr, n, offset) { var out = [], i; for (i = 0; i < n; i++) out.push(arr[(i + offset) % arr.length]); return out; }
+
+  function split(days) {
+    if (days === 2) return [
+      { name: '전신 A', parts: ['lower', 'push', 'core'] },
+      { name: '전신 B', parts: ['lower', 'pull', 'core'] }];
+    if (days === 3) return [
+      { name: '하체 · 코어', parts: ['lower', 'core'] },
+      { name: '미는 날 (가슴 · 어깨)', parts: ['push', 'core'] },
+      { name: '당기는 날 (등 · 팔)', parts: ['pull', 'core'] }];
+    if (days === 4) return [
+      { name: '하체', parts: ['lower'] },
+      { name: '등 · 이두', parts: ['pull'] },
+      { name: '하체 · 코어', parts: ['lower', 'core'] },
+      { name: '가슴 · 어깨 · 삼두', parts: ['push'] }];
+    return [
+      { name: '하체', parts: ['lower'] },
+      { name: '등 · 이두', parts: ['pull'] },
+      { name: '가슴 · 삼두', parts: ['push'] },
+      { name: '하체 · 코어', parts: ['lower', 'core'] },
+      { name: '어깨 · 팔 · 코어', parts: ['push', 'core'] }];
+  }
+
+  var LEVEL = {
+    none:     { sets: [2, 2, 3, 2], reps: '12 — 15회', rest: '휴식 90초', label: '입문' },
+    beginner: { sets: [3, 3, 3, 2], reps: '12회', rest: '휴식 90초', label: '초급' },
+    mid:      { sets: [3, 4, 4, 3], reps: '10 — 12회', rest: '휴식 75초', label: '중급' },
+    adv:      { sets: [4, 4, 5, 3], reps: '8 — 12회', rest: '휴식 60 — 90초', label: '상급' }
+  };
+  var WEEK_NOTE = [
+    '자세를 익히는 주. 마지막 2회가 버거운 무게로 시작합니다.',
+    '같은 자세로 무게만 2.5 — 5kg 올립니다.',
+    '가장 힘든 주. 세트를 늘리고 무게는 유지합니다.',
+    '몸을 회복시키는 주. 무게를 20% 낮추고 자세를 다듬습니다.'
+  ];
+
+  function calc(v) {
+    var bmr = 10 * v.weight + 6.25 * v.height - 5 * v.age + (v.sex === 'm' ? 5 : -161);
+    var af = 1.2 + (v.days >= 5 ? 0.28 : v.days === 4 ? 0.24 : v.days === 3 ? 0.2 : 0.16) - (v.sit >= 10 ? 0.04 : v.sit <= 6 ? 0 : 0.02);
+    var tdee = bmr * af;
+    var target = v.goal === 'fat' ? tdee * 0.82 : v.goal === 'muscle' ? tdee * 1.08 : tdee;
+    var protein = Math.round(v.weight * (v.goal === 'muscle' ? 1.8 : v.goal === 'fat' ? 1.9 : 1.5));
+    var fat = Math.round(v.weight * 0.9);
+    var carb = Math.max(60, Math.round((target - protein * 4 - fat * 9) / 4));
+    return {
+      bmr: Math.round(bmr), tdee: Math.round(tdee), kcal: Math.round(target / 10) * 10,
+      protein: protein, fat: fat, carb: carb,
+      bmi: (v.weight / Math.pow(v.height / 100, 2)).toFixed(1),
+      water: (Math.round(v.weight * 33 / 100) / 10).toFixed(1)
+    };
+  }
+
+  function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+
+  function render(v) {
+    var n = calc(v), lv = LEVEL[v.exp], plan = split(v.days), cardio;
+    cardio = v.goal === 'fat'
+      ? '운동 끝나고 빠르게 걷기 20 — 25분 (숨이 차지만 대화는 되는 속도)'
+      : v.goal === 'muscle' ? '운동 끝나고 가볍게 걷기 10분, 주 1회는 15분 인터벌' : '운동 끝나고 걷기 15분';
+    var steps = v.sit >= 10 ? '하루 8,000보' : v.sit >= 8 ? '하루 7,000보' : '하루 6,000보';
+
+    var weeks = '', w, d, ex, parts, i, list;
+    for (w = 0; w < 4; w++) {
+      var dayHtml = '';
+      for (d = 0; d < plan.length; d++) {
+        parts = plan[d].parts; list = [];
+        for (i = 0; i < parts.length; i++) {
+          ex = pick(EX[parts[i]], parts[i] === 'core' ? 2 : (parts.length > 1 ? 2 : 4), w);
+          list = list.concat(ex);
+        }
+        var exHtml = '';
+        for (i = 0; i < list.length; i++) {
+          var isCore = list[i][1] === 'core';
+          exHtml += '<div class="ex"><b>' + esc(list[i][0])
+            + ' <a class="vid" href="' + videoUrl(list[i][0]) + '" target="_blank" rel="noopener" aria-label="' + esc(list[i][0]) + ' 영상 보기">영상</a></b>'
+            + '<span class="sets">' + (isCore ? (lv.sets[w] >= 4 ? 3 : 2) + '세트' : lv.sets[w] + '세트 × ' + lv.reps) + '</span></div>';
+        }
+        dayHtml += '<div class="day"><div class="day-name">DAY ' + (d + 1) + '</div><h4>' + esc(plan[d].name) + '</h4>' + exHtml
+          + '<div class="ex" style="margin-top:6px"><b>마무리 유산소</b><span class="sets">' + esc(cardio.split('(')[0].trim()) + '</span></div></div>';
+      }
+      weeks += '<div class="week"><div class="week-head"><b>' + (w + 1) + '주차</b><span>' + esc(WEEK_NOTE[w]) + '</span><span style="margin-left:auto;font-family:var(--mono);font-size:12px">주 ' + v.days + '회 · ' + esc(lv.rest) + '</span></div><div class="week-body">' + dayHtml + '</div></div>';
+    }
+
+    var meals = [
+      ['아침', Math.round(n.kcal * 0.3), '달걀 2 — 3개 + 통곡물빵 1쪽 + 방울토마토', '출근 전 단백질을 먼저 채웁니다.'],
+      ['점심 (구내식당)', Math.round(n.kcal * 0.35), '밥 2/3공기 + 고기·생선 반찬 + 나물 두 종류', '국은 건더기 위주로, 튀김은 주 1회까지.'],
+      ['간식', Math.round(n.kcal * 0.1), '그릭요거트 또는 삶은 달걀 2개', '오후 4시 당 떨어질 때 먹습니다.'],
+      ['저녁', Math.round(n.kcal * 0.25), '단백질 한 손바닥 + 채소 두 주먹 + 밥 1/2공기', '운동한 날은 밥을 2/3공기로 늘립니다.']
+    ];
+    var mealRows = '';
+    for (i = 0; i < meals.length; i++) {
+      mealRows += '<tr><td><b>' + meals[i][0] + '</b><br><span style="color:var(--muted);font-size:13.5px">' + meals[i][3] + '</span></td><td>' + meals[i][2] + '</td><td class="num">' + meals[i][1] + ' kcal</td></tr>';
+    }
+
+    var deskHtml = '';
+    for (i = 0; i < DESK.length; i++) deskHtml += '<li>' + esc(DESK[i]) + ' <a class="vid" href="' + videoUrl(DESK[i]) + '" target="_blank" rel="noopener">영상</a></li>';
+
+    document.getElementById('rx').innerHTML =
+      '<div class="rx-head"><div><h2>' + (v.age) + '세 · ' + (v.sex === 'm' ? '남성' : '여성') + ' · ' + esc(lv.label) + ' 처방</h2>'
+      + '<div class="sub">' + v.height + 'cm · ' + v.weight + 'kg · 주 ' + v.days + '회 · '
+      + (v.goal === 'fat' ? '체지방 감량' : v.goal === 'muscle' ? '근육량 증가' : '체력 · 자세 관리') + '</div></div>'
+      + '<div class="badge">4주 · ' + (v.days * 4) + '회 운동</div></div>'
+
+      + '<div class="rx-body">'
+      + '<div class="block"><h3>기준 수치</h3><div class="stats">'
+      + '<div class="stat"><b>' + n.kcal + '</b><span>하루 목표 열량 (kcal)</span></div>'
+      + '<div class="stat"><b>' + n.protein + 'g</b><span>단백질</span></div>'
+      + '<div class="stat"><b>' + n.carb + 'g</b><span>탄수화물</span></div>'
+      + '<div class="stat"><b>' + n.fat + 'g</b><span>지방</span></div>'
+      + '<div class="stat"><b>' + n.bmi + '</b><span>체질량지수 BMI</span></div>'
+      + '<div class="stat"><b>' + n.water + 'L</b><span>하루 물</span></div>'
+      + '</div><p style="margin:12px 0 0;font-size:13.5px;color:var(--muted)">기초대사량 ' + n.bmr + 'kcal, 활동을 더한 하루 소비량 약 ' + n.tdee + 'kcal 기준입니다.</p></div>'
+
+      + '<div class="block"><h3>4주 운동 루틴</h3><div class="weeks">' + weeks + '</div>'
+      + '<p style="margin:14px 0 0;font-size:14px;color:var(--muted)">유산소: ' + esc(cardio) + ' · 걸음 목표 ' + steps + '</p>'
+      + '<p style="margin:10px 0 0;font-size:14px;color:var(--muted)">운동 이름 옆 <span class="vid" style="cursor:default">영상</span>을 누르면 동작을 영상으로 볼 수 있습니다. 더 많은 운동 영상은 <a href="' + CHANNEL + '" target="_blank" rel="noopener">유튜브 박찬웅 채널</a>에 있습니다.</p></div>'
+
+      + '<div class="block"><h3>하루 식단 기준</h3><div class="table-wrap"><table><thead><tr><th>끼니</th><th>이렇게 드세요</th><th>열량</th></tr></thead><tbody>'
+      + mealRows + '</tbody></table></div>'
+      + '<ul class="tips" style="margin-top:16px">'
+      + '<li><b>먹는 순서를 바꾸세요.</b> 채소와 단백질을 먼저, 밥과 면은 나중에 먹으면 같은 양을 먹어도 덜 부담됩니다.</li>'
+      + '<li><b>회식은 다음 날로 갚지 마세요.</b> 굶는 대신 그날 술 한 잔당 물 한 잔, 다음 날은 평소대로 먹습니다.</li>'
+      + '<li><b>야근 간식은 미리 준비합니다.</b> 서랍에 견과 한 봉, 단백질 음료 하나면 편의점 빵을 피할 수 있습니다.</li>'
+      + '<li><b>주말 두 끼까지는 자유롭게.</b> 일주일 21끼 중 2끼는 계획에 넣어두면 오래 갑니다.</li>'
+      + '</ul></div>'
+
+      + '<div class="block"><h3>책상에서 매일 5분</h3><ul class="tips">' + deskHtml
+      + '<li><b>50분에 한 번은 일어나세요.</b> 앉아 있는 시간이 길수록 허리와 목이 먼저 상합니다.</li></ul></div>'
+
+      + '<div class="cta"><strong>이 처방전대로 해보시겠어요?</strong>'
+      + '<div>자세가 맞는지, 무게가 적당한지는 옆에서 한 번 봐주면 훨씬 빨라집니다. 팀보노짐은 24시간 운영하고 PT를 강요하지 않습니다. 처방전을 들고 오시면 기구 사용법을 무료로 알려드립니다.</div>'
+      + '<div class="btns"><a class="solid" href="https://talk.naver.com/WCSB53" target="_blank" rel="noopener">네이버 톡톡으로 문의</a>'
+      + '<a href="tel:0312217522">031-221-7522</a>'
+      + '<a href="mailto:cw7232@naver.com">기관 · 단체 강의 문의</a></div></div>'
+
+      + '<p class="caution">이 처방전은 일반적인 운동·식단 기준을 계산한 참고 자료입니다. 허리나 무릎 통증, 심혈관 질환, 임신 등 건강 문제가 있다면 반드시 의사와 상담한 뒤 시작하세요. 통증이 생기면 즉시 중단하고 전문가에게 확인받으시기 바랍니다.</p>'
+      + '</div>';
+  }
+
+  function read() {
+    var g = function (id) { return document.getElementById(id).value; };
+    return {
+      sex: g('sex'), age: +g('age') || 40, height: +g('height') || 170, weight: +g('weight') || 70,
+      exp: g('exp'), days: +g('days'), goal: g('goal'), sit: +g('sit')
+    };
+  }
+  document.getElementById('rx-form').addEventListener('submit', function (e) { e.preventDefault(); render(read()); document.getElementById('rx').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  document.getElementById('print').addEventListener('click', function () { window.print(); });
+  render(read());
+})();
+</script>
