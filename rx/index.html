@@ -227,6 +227,13 @@
     pull: [['랫 풀다운', 'pull'], ['시티드 케이블 로우', 'pull'], ['원암 덤벨 로우', 'pull'], ['페이스 풀', 'pull'], ['덤벨 컬', 'pull']],
     core: [['플랭크 40초', 'core'], ['데드버그 좌우 10회', 'core'], ['버드독 좌우 10회', 'core'], ['사이드 플랭크 30초', 'core']]
   };
+  // 60세 이상: 균형을 잡을 필요가 적고 궤적이 고정된 머신·케이블 위주 (덤벨·바벨·스미스 제외)
+  var EX_SAFE = {
+    lower: [['레그 프레스', 'legs'], ['레그 익스텐션', 'legs'], ['시티드 레그 컬 머신', 'legs'], ['힙 어브덕션 머신', 'legs'], ['힙 어덕션 머신', 'legs']],
+    push: [['체스트 프레스 머신', 'push'], ['숄더 프레스 머신', 'push'], ['펙덱 플라이 머신', 'push'], ['케이블 트라이셉스 푸시다운', 'push']],
+    pull: [['랫 풀다운', 'pull'], ['시티드 로우 머신', 'pull'], ['리어 델트 머신', 'pull'], ['암 컬 머신', 'pull']],
+    core: [['데드버그 좌우 10회', 'core'], ['버드독 좌우 10회', 'core'], ['복근 크런치 머신', 'core']]
+  };
   // 운동별 영상 링크. 팀보노짐 채널 영상 주소를 넣으면 그 영상으로, 비어 있으면 유튜브 검색으로 연결됩니다.
   var VIDEO = {
     '레그 프레스': '', '스미스 스쿼트': '', '루마니안 데드리프트': '', '레그 컬': '', '레그 익스텐션': '', '카프 레이즈': '',
@@ -304,6 +311,9 @@
 
   function render(v) {
     var n = calc(v), lv = LEVEL[v.exp], plan = split(v.days);
+    var senior = v.age >= 60;
+    var POOL = senior ? EX_SAFE : EX;
+    var reps = senior ? '12 — 15회 (가볍게)' : lv.reps;
     var bmi = +n.bmi;
     var restSec = { none: 90, beginner: 90, mid: 75, adv: 75 }[v.exp];
     var target = { none: 50, beginner: 50, mid: 60, adv: 70 }[v.exp];
@@ -331,9 +341,9 @@
           body += '<div class="sub-label">전신 스트레칭 15분</div>';
           for (i = 0; i < STRETCH_ITEMS.length; i++) body += exRow(STRETCH_ITEMS[i], '');
           body += '<div class="sub-label">가벼운 머신 · 15회가 여유 있는 무게</div>';
-          var machines = [EX.lower[(d + w) % EX.lower.length], EX.push[(d + w) % EX.push.length], EX.pull[(d + w) % EX.pull.length]];
+          var machines = [POOL.lower[(d + w) % POOL.lower.length], POOL.push[(d + w) % POOL.push.length], POOL.pull[(d + w) % POOL.pull.length]];
           for (i = 0; i < machines.length; i++) body += exRow(machines[i][0], '2세트 × 15회');
-          body += exRow(EX.core[(d + w) % EX.core.length][0], '2세트');
+          body += exRow(POOL.core[(d + w) % POOL.core.length][0], '2세트');
           var c1 = gentle || bmi < 18.5 ? 10 : 10;
           body += plainRow('유산소 · ' + cardioKind, c1 + '분');
           body += plainRow('마무리 스트레칭', '5분');
@@ -341,10 +351,10 @@
         } else {
           parts = plan[d].parts; list = [];
           for (i = 0; i < parts.length; i++) {
-            ex = pick(EX[parts[i]], parts[i] === 'core' ? 2 : (parts.length > 1 ? 2 : 4), w);
+            ex = pick(POOL[parts[i]], parts[i] === 'core' ? 2 : (parts.length > 1 ? 2 : 4), w);
             list = list.concat(ex);
           }
-          var sets = lv.sets[w];
+          var sets = senior ? Math.min(lv.sets[w], 3) : lv.sets[w];
           var coreSets = sets >= 4 ? 3 : 2;
           var wmin = function () { var m = 0; for (var k = 0; k < list.length; k++) m += list[k][1] === 'core' ? exMin(coreSets, true) : exMin(sets, false); return m; };
           // 목표 시간을 넘으면 뒤쪽 종목부터 줄임 (최소 2종목)
@@ -355,7 +365,7 @@
           body += plainRow('워밍업 스트레칭', warm + '분');
           for (i = 0; i < list.length; i++) {
             var isCore = list[i][1] === 'core';
-            body += exRow(list[i][0], isCore ? coreSets + '세트' : sets + '세트 × ' + lv.reps);
+            body += exRow(list[i][0], isCore ? coreSets + '세트' : sets + '세트 × ' + reps);
           }
           body += plainRow('유산소 · ' + cardioKind, cmin + '분');
           total = Math.round(warm + wmin() + cmin);
@@ -390,6 +400,8 @@
     if (v.age >= 60) {
       tags.push('60세 이상');
       tip('60세 이상이라면', '숨을 참고 무거운 무게를 드는 동작은 피하세요. 혈압약이나 당뇨약을 드신다면 시작 전에 담당 의사와 상의해 주세요. 하루 운동은 50분 이내로 잡았습니다.');
+      tags.push('머신 위주');
+      tip('60세 이상은 머신 위주로 짰습니다.', '덤벨·바벨처럼 균형을 잡아야 하는 운동은 빼고, 궤적이 고정된 머신과 케이블만 넣었습니다. 세트는 3세트까지, 12~15회가 가볍게 되는 무게로 하세요.');
     } else if (v.age >= 50) {
       tags.push('50세 이상');
       tip('50세 이상이라면', '관절과 혈압을 먼저 챙기세요. 숨을 참고 힘주는 동작은 피하고, 워밍업을 ' + warm + '분으로 늘렸습니다.');
