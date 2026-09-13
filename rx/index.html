@@ -109,6 +109,9 @@
   .notice-box li { position: relative; padding-left: 20px; color: var(--muted); font-size: 15.5px; }
   .notice-box li::before { content: ""; position: absolute; left: 4px; top: .72em; width: 6px; height: 6px; border-radius: 50%; background: var(--brass); }
   .notice-box li b { color: var(--text); font-weight: 500; }
+  .notice-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 12px; }
+  .notice-tags span { font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em; color: var(--brass); border: 1px solid var(--line-strong); border-radius: 999px; padding: 2px 10px; }
+  .sub-label { font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; color: var(--brass); margin: 8px 0 2px; }
   .tips { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; }
   .tips li { padding-left: 22px; position: relative; color: var(--muted); }
   .tips li::before { content: "—"; position: absolute; left: 0; color: var(--brass); }
@@ -274,6 +277,13 @@
     '몸을 회복시키는 주. 무게를 20% 낮추고 자세를 다듬습니다.'
   ];
 
+  var STRETCH_WEEK_NOTE = [
+    '스트레칭이 메인인 적응 주간입니다. 몸이 운동에 익숙해지는 기간이라 무게 욕심은 내려놓으세요.',
+    '스트레칭 메인 주간입니다. 머신 동작과 호흡을 몸에 익힙니다.',
+    '스트레칭 메인 마지막 주간입니다. 관절이 편안한지 확인하며 마무리합니다.'
+  ];
+  var STRETCH_ITEMS = ['고양이-소 자세 10회', '흉추 회전 스트레칭 좌우 10회', '고관절 굴곡근 스트레칭 좌우 30초', '햄스트링 스트레칭 좌우 30초', '광배 스트레칭 좌우 30초', '가슴 스트레칭 좌우 30초'];
+
   function calc(v) {
     var bmr = 10 * v.weight + 6.25 * v.height - 5 * v.age + (v.sex === 'm' ? 5 : -161);
     var af = 1.2 + (v.days >= 5 ? 0.28 : v.days === 4 ? 0.24 : v.days === 3 ? 0.2 : 0.16) - (v.sit >= 10 ? 0.04 : v.sit <= 6 ? 0 : 0.02);
@@ -293,33 +303,120 @@
   function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
 
   function render(v) {
-    var n = calc(v), lv = LEVEL[v.exp], plan = split(v.days), cardio;
-    cardio = v.goal === 'fat'
-      ? '운동 끝나고 빠르게 걷기 20 — 25분 (숨이 차지만 대화는 되는 속도)'
-      : v.goal === 'muscle' ? '운동 끝나고 가볍게 걷기 10분, 주 1회는 15분 인터벌' : '운동 끝나고 걷기 15분';
+    var n = calc(v), lv = LEVEL[v.exp], plan = split(v.days);
+    var bmi = +n.bmi;
+    var restSec = { none: 90, beginner: 90, mid: 75, adv: 75 }[v.exp];
+    var target = { none: 50, beginner: 50, mid: 60, adv: 70 }[v.exp];
+    if (v.age >= 60) target = Math.min(target, 50);
+    var warm = Math.min(20, { none: 15, beginner: 10, mid: 8, adv: 5 }[v.exp] + (v.age >= 50 ? 5 : 0) + (v.sit >= 10 ? 3 : 0));
+    var stretchWeeks = v.exp === 'none' ? (v.age >= 60 ? 3 : 2) : (v.exp === 'beginner' && v.age >= 50 ? 1 : 0);
+    var gentle = bmi >= 30 || v.age >= 60;
+    var cardioKind = gentle ? '실내 사이클 또는 빠르게 걷기' : (v.goal === 'fat' ? '빠르게 걷기 또는 가벼운 러닝' : '가볍게 걷기');
+    var cardioMax = bmi < 18.5 ? 10 : v.goal === 'fat' ? 25 : v.goal === 'muscle' ? 10 : 15;
     var steps = v.sit >= 10 ? '하루 8,000보' : v.sit >= 8 ? '하루 7,000보' : '하루 6,000보';
+    function exMin(sets, isCore) { return sets * ((isCore ? 40 : 45) + restSec) / 60; }
+    function round5(x) { return Math.max(5, Math.floor(x / 5) * 5); }  // 내림: 목표 시간을 넘지 않게
+    function exRow(name, right) {
+      return '<div class="ex"><b>' + esc(name) + ' <a class="vid" href="' + videoUrl(name) + '" target="_blank" rel="noopener" aria-label="' + esc(name) + ' 영상 보기">영상</a></b><span class="sets">' + right + '</span></div>';
+    }
+    function plainRow(name, right) { return '<div class="ex"><b>' + esc(name) + '</b><span class="sets">' + right + '</span></div>'; }
 
     var weeks = '', w, d, ex, parts, i, list;
     for (w = 0; w < 4; w++) {
-      var dayHtml = '';
+      var dayHtml = '', stretchMain = w < stretchWeeks, note, dayMins = [];
       for (d = 0; d < plan.length; d++) {
-        parts = plan[d].parts; list = [];
-        for (i = 0; i < parts.length; i++) {
-          ex = pick(EX[parts[i]], parts[i] === 'core' ? 2 : (parts.length > 1 ? 2 : 4), w);
-          list = list.concat(ex);
+        var body = '', total;
+        if (stretchMain) {
+          // 스트레칭 메인 날: 전신 스트레칭 15분 + 가벼운 머신 3종목 + 코어 1종목 + 유산소 + 마무리 스트레칭
+          body += '<div class="sub-label">전신 스트레칭 15분</div>';
+          for (i = 0; i < STRETCH_ITEMS.length; i++) body += exRow(STRETCH_ITEMS[i], '');
+          body += '<div class="sub-label">가벼운 머신 · 15회가 여유 있는 무게</div>';
+          var machines = [EX.lower[(d + w) % EX.lower.length], EX.push[(d + w) % EX.push.length], EX.pull[(d + w) % EX.pull.length]];
+          for (i = 0; i < machines.length; i++) body += exRow(machines[i][0], '2세트 × 15회');
+          body += exRow(EX.core[(d + w) % EX.core.length][0], '2세트');
+          var c1 = gentle || bmi < 18.5 ? 10 : 10;
+          body += plainRow('유산소 · ' + cardioKind, c1 + '분');
+          body += plainRow('마무리 스트레칭', '5분');
+          total = Math.round(15 + exMin(2, false) * 3 + exMin(2, true) + c1 + 5);
+        } else {
+          parts = plan[d].parts; list = [];
+          for (i = 0; i < parts.length; i++) {
+            ex = pick(EX[parts[i]], parts[i] === 'core' ? 2 : (parts.length > 1 ? 2 : 4), w);
+            list = list.concat(ex);
+          }
+          var sets = lv.sets[w];
+          var coreSets = sets >= 4 ? 3 : 2;
+          var wmin = function () { var m = 0; for (var k = 0; k < list.length; k++) m += list[k][1] === 'core' ? exMin(coreSets, true) : exMin(sets, false); return m; };
+          // 목표 시간을 넘으면 뒤쪽 종목부터 줄임 (최소 2종목)
+          while (warm + wmin() + 5 > target && list.length > 2) {
+            for (var r = list.length - 1; r >= 0; r--) { if (list[r][1] !== 'core' || r === list.length - 1) { list.splice(r, 1); break; } }
+          }
+          var cmin = round5(Math.min(cardioMax, target - warm - wmin()));
+          body += plainRow('워밍업 스트레칭', warm + '분');
+          for (i = 0; i < list.length; i++) {
+            var isCore = list[i][1] === 'core';
+            body += exRow(list[i][0], isCore ? coreSets + '세트' : sets + '세트 × ' + lv.reps);
+          }
+          body += plainRow('유산소 · ' + cardioKind, cmin + '분');
+          total = Math.round(warm + wmin() + cmin);
         }
-        var exHtml = '';
-        for (i = 0; i < list.length; i++) {
-          var isCore = list[i][1] === 'core';
-          exHtml += '<div class="ex"><b>' + esc(list[i][0])
-            + ' <a class="vid" href="' + videoUrl(list[i][0]) + '" target="_blank" rel="noopener" aria-label="' + esc(list[i][0]) + ' 영상 보기">영상</a></b>'
-            + '<span class="sets">' + (isCore ? (lv.sets[w] >= 4 ? 3 : 2) + '세트' : lv.sets[w] + '세트 × ' + lv.reps) + '</span></div>';
-        }
-        dayHtml += '<div class="day"><div class="day-name">DAY ' + (d + 1) + '</div><h4>' + esc(plan[d].name) + '</h4>' + exHtml
-          + '<div class="ex" style="margin-top:6px"><b>마무리 유산소</b><span class="sets">' + esc(cardio.split('(')[0].trim()) + '</span></div></div>';
+        dayMins.push(total);
+        dayHtml += '<div class="day"><div class="day-name">DAY ' + (d + 1) + ' · 약 ' + total + '분</div><h4>' + esc(stretchMain ? '스트레칭 메인 · 전신 적응' : plan[d].name) + '</h4>' + body + '</div>';
       }
-      weeks += '<div class="week"><div class="week-head"><b>' + (w + 1) + '주차</b><span>' + esc(WEEK_NOTE[w]) + '</span><span style="margin-left:auto;font-family:var(--mono);font-size:12px">주 ' + v.days + '회 · ' + esc(lv.rest) + '</span></div><div class="week-body">' + dayHtml + '</div></div>';
+      if (stretchMain) note = STRETCH_WEEK_NOTE[w];
+      else if (v.exp === 'none') note = w === stretchWeeks ? '본격 웨이트를 시작합니다. 15회가 여유 있는 가벼운 무게로 시작하세요.' : '같은 자세로 무게를 조금씩만 올립니다.';
+      else note = WEEK_NOTE[w];
+      weeks += '<div class="week"><div class="week-head"><b>' + (w + 1) + '주차</b><span>' + esc(note) + '</span><span style="margin-left:auto;font-family:var(--mono);font-size:12px">주 ' + v.days + '회 · 하루 ' + Math.max.apply(null, dayMins) + '분 이내</span></div><div class="week-body">' + dayHtml + '</div></div>';
     }
+
+    // ── 설문 맞춤 주의사항
+    var tags = [], tips = [];
+    function tip(label, text) { tips.push('<li><b>' + label + '</b> ' + text + '</li>'); }
+    if (v.exp === 'none') {
+      tags.push('운동 입문');
+      tip('운동이 처음이라면', '본격적인 웨이트 트레이닝 전에 반드시 스트레칭을 우선적으로 해주셔야 합니다.');
+      tip('운동 시작 후 ' + (stretchWeeks * 7 === 14 ? '2주간은' : stretchWeeks + '주간은'), '스트레칭이 메인이 된 운동을 하셨을 때 효과가 더 좋습니다. 그래서 ' + stretchWeeks + '주차까지는 스트레칭 메인 루틴으로 짰습니다.');
+      tip('운동 초보라면', '운동 시간은 50분을 넘기지 않게 주의합니다. 부상과 운동 과부하를 막기 위해서입니다.');
+    } else if (v.exp === 'beginner') {
+      tags.push('헬스 1년 미만');
+      tip('헬스 1년 미만이라면', '운동 전 스트레칭 ' + warm + '분을 꼭 먼저 하고, 운동 시간은 50분 안쪽으로 맞춰주세요.');
+      tip('무게보다 자세가 먼저입니다.', '마지막 2회가 버거운 정도면 충분합니다. 자세가 무너지면 그 세트는 멈추세요.');
+      if (stretchWeeks) tip('1주차는', '50세 이상 초급자에 맞춰 스트레칭 메인 주간으로 넣었습니다.');
+    } else {
+      tags.push(v.exp === 'mid' ? '헬스 1~3년' : '헬스 3년 이상');
+      tip('3주차가 가장 힘든 주입니다.', '관절이 아프면 무게를 줄이세요. 근육이 힘든 것과 관절이 아픈 것은 다릅니다.');
+      tip('4주차는 회복 주간입니다.', '쉬어가는 주가 있어야 다음 4주에 더 강해집니다. 욕심내서 건너뛰지 마세요.');
+    }
+    if (v.age >= 60) {
+      tags.push('60세 이상');
+      tip('60세 이상이라면', '숨을 참고 무거운 무게를 드는 동작은 피하세요. 혈압약이나 당뇨약을 드신다면 시작 전에 담당 의사와 상의해 주세요. 하루 운동은 50분 이내로 잡았습니다.');
+    } else if (v.age >= 50) {
+      tags.push('50세 이상');
+      tip('50세 이상이라면', '관절과 혈압을 먼저 챙기세요. 숨을 참고 힘주는 동작은 피하고, 워밍업을 ' + warm + '분으로 늘렸습니다.');
+    }
+    if (bmi >= 30) {
+      tags.push('BMI ' + n.bmi);
+      tip('현재 체중에서는', '러닝과 점프가 무릎과 발목에 부담이 큽니다. 유산소는 실내 사이클이나 빠르게 걷기로 대신했습니다.');
+    } else if (bmi >= 25 && v.goal === 'fat') {
+      tags.push('BMI ' + n.bmi);
+      tip('체중 감량은', '한 주에 0.5kg 안팎이 적당합니다. 너무 빨리 빠지면 근육도 같이 빠집니다.');
+    } else if (bmi < 18.5) {
+      tags.push('저체중');
+      tip('체중이 적은 편이라', '유산소를 10분으로 짧게 잡았습니다. 끼니를 거르지 말고 목표 열량 ' + n.kcal + 'kcal를 채워주세요.');
+    }
+    if (v.sit >= 10) {
+      tags.push('하루 10시간+ 앉음');
+      tip('하루 10시간 이상 앉아 계신다면', '고관절과 등이 굳어 있습니다. 워밍업에 3분을 더했고, 운동 전 고관절·흉추 스트레칭을 빼먹지 마세요.');
+    }
+    if (v.days >= 5) tip('주 5회라면', '나머지 이틀은 꼭 쉬세요. 근육은 운동하는 날이 아니라 쉬는 날 자랍니다.');
+    if (v.days === 2) tip('주 2회라면', '전신 루틴이 가장 효율적입니다. 운동 안 하는 날은 걷기로 활동량을 채우세요.');
+    if (v.goal === 'muscle') tip('근육량을 늘리려면', '하루 단백질 ' + n.protein + 'g과 7시간 수면이 운동만큼 중요합니다.');
+    if (v.goal === 'fat' && !(bmi >= 25)) tip('체지방을 줄이려면', '식단이 결과의 절반입니다. 목표 열량 ' + n.kcal + 'kcal를 지키는 날이 많을수록 빨리 빠집니다.');
+
+    var noticeHtml = '<div class="notice-box"><h3>' + v.age + '세 · ' + esc(lv.label) + ' 맞춤 주의사항</h3>'
+      + '<div class="notice-tags">' + tags.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('') + '</div>'
+      + '<ul>' + tips.join('') + '</ul></div>';
+    var cardio = cardioKind + ' (하루 ' + target + '분 이내에 맞춰 시간 배분)';
 
     var meals = [
       ['아침', Math.round(n.kcal * 0.3), '달걀 2 — 3개 + 통곡물빵 1쪽 + 방울토마토', '출근 전 단백질을 먼저 채웁니다.'],
@@ -351,11 +448,7 @@
       + '<div class="stat"><b>' + n.water + 'L</b><span>하루 물</span></div>'
       + '</div><p style="margin:12px 0 0;font-size:13.5px;color:var(--muted)">기초대사량 ' + n.bmr + 'kcal, 활동을 더한 하루 소비량 약 ' + n.tdee + 'kcal 기준입니다.</p></div>'
 
-      + '<div class="notice-box"><h3>루틴을 시작하기 전에 꼭 읽어주세요</h3><ul>'
-      + '<li><b>운동이 처음이라면</b> 본격적인 웨이트 트레이닝 전에 반드시 스트레칭을 우선적으로 해주셔야 합니다.</li>'
-      + '<li><b>운동 시작 후 2주간은</b> 스트레칭이 메인이 된 운동을 하셨을 때 효과가 더 좋습니다.</li>'
-      + '<li><b>운동 초보라면</b> 운동 시간은 50분을 넘기지 않게 주의합니다. 부상과 운동 과부하를 막기 위해서입니다.</li>'
-      + '</ul></div>'
+      + noticeHtml
       + '<div class="block"><h3>4주 운동 루틴</h3><div class="weeks">' + weeks + '</div>'
       + '<p style="margin:14px 0 0;font-size:14px;color:var(--muted)">유산소: ' + esc(cardio) + ' · 걸음 목표 ' + steps + '</p>'
       + '<p style="margin:10px 0 0;font-size:14px;color:var(--muted)">운동 이름 옆 <span class="vid" style="cursor:default">영상</span>을 누르면 동작을 영상으로 볼 수 있습니다. 더 많은 운동 영상은 <a href="' + CHANNEL + '" target="_blank" rel="noopener">유튜브 박찬웅 채널</a>에 있습니다.</p></div>'
