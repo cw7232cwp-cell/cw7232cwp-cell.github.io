@@ -44,6 +44,13 @@
   header.top h1 { font-size: clamp(34px, 6vw, 58px); line-height: 1.15; margin-block: 12px 14px; }
   header.top h1 em { font-style: normal; color: var(--brass); }
   header.top p { margin: 0; color: var(--muted); max-width: 60ch; }
+  .principles { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .principles span { font-size: 14px; font-weight: 500; color: var(--text); background: var(--panel); border: 1px solid var(--line-strong); border-radius: 999px; padding: 5px 14px; }
+  .principles span::before { content: "✓ "; color: var(--brass); }
+  .done { display: inline-flex; align-items: center; gap: 5px; margin-right: 10px; cursor: pointer; color: var(--muted); }
+  .done input { width: 16px; height: 16px; accent-color: var(--brass); cursor: pointer; }
+  .day.is-done h4 { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--brass); }
+  .rx-head .badge em, .wk-done { font-style: normal; color: var(--brass); font-weight: 500; }
   .stamp { display: inline-flex; align-items: center; gap: 8px; margin-top: 22px; font-family: var(--mono); font-size: 12px; letter-spacing: .1em; color: var(--brass); border: 1px solid var(--brass); border-radius: 2px; padding: 8px 14px; }
 
   main { padding-block: clamp(30px, 5vw, 54px) clamp(50px, 8vw, 90px); }
@@ -139,6 +146,7 @@
     <p class="eyebrow">팀보노짐 · 수원 권선동 24시간 헬스장</p>
     <h1>앉아서 일하는 사람을 위한<br><em>운동 처방전</em></h1>
     <p>하루 여덟 시간 책상에 앉아 있는 공무원과 직장인을 위해, 17년 경력 트레이너가 쓰는 방식 그대로 4주 운동 루틴과 식단 기준을 만들어 드립니다. 키와 나이, 운동 경력, 일주일에 낼 수 있는 시간만 적으면 됩니다.</p>
+    <div class="principles"><span>안 다치고</span><span>어렵지 않고</span><span>재밌게</span><span>오래</span></div>
     <div class="stamp">처방 · 팀보노짐 박찬웅</div>
   </div>
 </header>
@@ -275,15 +283,14 @@
     none:     { sets: [2, 2, 3, 2], reps: '12 — 15회', rest: '휴식 90초', label: '입문' },
     beginner: { sets: [3, 3, 3, 2], reps: '12회', rest: '휴식 90초', label: '초급' },
     mid:      { sets: [3, 4, 4, 3], reps: '10 — 12회', rest: '휴식 75초', label: '중급' },
-    adv:      { sets: [4, 4, 5, 3], reps: '8 — 12회', rest: '휴식 60 — 90초', label: '상급' }
+    adv:      { sets: [3, 4, 4, 3], reps: '10 — 12회', rest: '휴식 60 — 90초', label: '상급' }
   };
   var WEEK_NOTE = [
-    '자세를 익히는 주. 마지막 2회가 버거운 무게로 시작합니다.',
-    '같은 자세로 무게만 2.5 — 5kg 올립니다.',
-    '가장 힘든 주. 세트를 늘리고 무게는 유지합니다.',
-    '몸을 회복시키는 주. 무게를 20% 낮추고 자세를 다듬습니다.'
+    '자세를 익히는 주. 마지막 2~3회는 남겨두는 무게로 시작합니다.',
+    '같은 자세로 무게만 2.5 — 5kg 올립니다. 자세가 흔들리면 올리지 않습니다.',
+    '조금 더 해보는 주. 세트를 하나 늘리되 마지막 2회는 남겨둡니다.',
+    '몸을 회복시키는 주. 무게를 20% 낮추고 가볍게 즐깁니다.'
   ];
-
   var STRETCH_WEEK_NOTE = [
     '스트레칭이 메인인 적응 주간입니다. 몸이 운동에 익숙해지는 기간이라 무게 욕심은 내려놓으세요.',
     '스트레칭 메인 주간입니다. 머신 동작과 호흡을 몸에 익힙니다.',
@@ -371,12 +378,12 @@
           total = Math.round(warm + wmin() + cmin);
         }
         dayMins.push(total);
-        dayHtml += '<div class="day"><div class="day-name">DAY ' + (d + 1) + ' · 약 ' + total + '분</div><h4>' + esc(stretchMain ? '스트레칭 메인 · 전신 적응' : plan[d].name) + '</h4>' + body + '</div>';
+        dayHtml += '<div class="day"><div class="day-name"><label class="done"><input type="checkbox" data-k="' + w + '-' + d + '"> 완료</label>DAY ' + (d + 1) + ' · 약 ' + total + '분</div><h4>' + esc(stretchMain ? '스트레칭 메인 · 전신 적응' : plan[d].name) + '</h4>' + body + '</div>';
       }
       if (stretchMain) note = STRETCH_WEEK_NOTE[w];
       else if (v.exp === 'none') note = w === stretchWeeks ? '본격 웨이트를 시작합니다. 15회가 여유 있는 가벼운 무게로 시작하세요.' : '같은 자세로 무게를 조금씩만 올립니다.';
       else note = WEEK_NOTE[w];
-      weeks += '<div class="week"><div class="week-head"><b>' + (w + 1) + '주차</b><span>' + esc(note) + '</span><span style="margin-left:auto;font-family:var(--mono);font-size:12px">주 ' + v.days + '회 · 하루 ' + Math.max.apply(null, dayMins) + '분 이내</span></div><div class="week-body">' + dayHtml + '</div></div>';
+      weeks += '<div class="week"><div class="week-head"><b>' + (w + 1) + '주차</b><span>' + esc(note) + '</span><span style="margin-left:auto;font-family:var(--mono);font-size:12px">주 ' + v.days + '회 · 하루 ' + Math.max.apply(null, dayMins) + '분 이내 · <em class="wk-done" data-w="' + w + '">0</em>/' + plan.length + ' 완료</span></div><div class="week-body">' + dayHtml + '</div></div>';
     }
 
     // ── 설문 맞춤 주의사항
@@ -394,8 +401,8 @@
       if (stretchWeeks) tip('1주차는', '50세 이상 초급자에 맞춰 스트레칭 메인 주간으로 넣었습니다.');
     } else {
       tags.push(v.exp === 'mid' ? '헬스 1~3년' : '헬스 3년 이상');
-      tip('3주차가 가장 힘든 주입니다.', '관절이 아프면 무게를 줄이세요. 근육이 힘든 것과 관절이 아픈 것은 다릅니다.');
-      tip('4주차는 회복 주간입니다.', '쉬어가는 주가 있어야 다음 4주에 더 강해집니다. 욕심내서 건너뛰지 마세요.');
+      tip('3주차는 조금 더 해보는 주입니다.', '그래도 마지막 2회는 남겨두세요. 관절이 아프면 바로 무게를 줄입니다. 근육이 힘든 것과 관절이 아픈 것은 다릅니다.');
+      tip('4주차는 회복 주간입니다.', '쉬어가는 주가 있어야 다음 4주도 즐겁게 이어갈 수 있습니다. 욕심내서 건너뛰지 마세요.');
     }
     if (v.age >= 60) {
       tags.push('60세 이상');
@@ -425,6 +432,8 @@
     if (v.goal === 'muscle') tip('근육량을 늘리려면', '하루 단백질 ' + n.protein + 'g과 7시간 수면이 운동만큼 중요합니다.');
     if (v.goal === 'fat' && !(bmi >= 25)) tip('체지방을 줄이려면', '식단이 결과의 절반입니다. 목표 열량 ' + n.kcal + 'kcal를 지키는 날이 많을수록 빨리 빠집니다.');
 
+    tip('조금 아쉬울 때 멈추세요.', '다음에 또 오고 싶은 정도가 딱 좋습니다. 매주 종목이 조금씩 바뀌니 지루할 틈이 없습니다.');
+    tip('운동한 날은 체크하세요.', '각 DAY 옆 체크칸을 누르면 이 기기에 기록이 남습니다. ' + (v.days * 4) + '칸을 채우는 재미로 해보세요.');
     var noticeHtml = '<div class="notice-box"><h3>' + v.age + '세 · ' + esc(lv.label) + ' 맞춤 주의사항</h3>'
       + '<div class="notice-tags">' + tags.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('') + '</div>'
       + '<ul>' + tips.join('') + '</ul></div>';
@@ -448,7 +457,7 @@
       '<div class="rx-head"><div><h2>' + (v.age) + '세 · ' + (v.sex === 'm' ? '남성' : '여성') + ' · ' + esc(lv.label) + ' 처방</h2>'
       + '<div class="sub">' + v.height + 'cm · ' + v.weight + 'kg · 주 ' + v.days + '회 · '
       + (v.goal === 'fat' ? '체지방 감량' : v.goal === 'muscle' ? '근육량 증가' : '체력 · 자세 관리') + '</div></div>'
-      + '<div class="badge">4주 · ' + (v.days * 4) + '회 운동</div></div>'
+      + '<div class="badge">4주 · <em id="done-total">0</em>/' + (v.days * 4) + '회 완료</div></div>'
 
       + '<div class="rx-body">'
       + '<div class="block"><h3>기준 수치</h3><div class="stats">'
@@ -485,6 +494,35 @@
 
       + '<p class="caution">이 처방전은 일반적인 운동·식단 기준을 계산한 참고 자료입니다. 허리나 무릎 통증, 심혈관 질환, 임신 등 건강 문제가 있다면 반드시 의사와 상담한 뒤 시작하세요. 통증이 생기면 즉시 중단하고 전문가에게 확인받으시기 바랍니다.</p>'
       + '</div>';
+    bindChecks(v);
+  }
+
+  // 완료 체크: 설문(경력·횟수·나이대)별로 이 기기에 저장
+  function bindChecks(v) {
+    var key = 'rx-done-' + v.exp + '-' + v.days + '-' + (v.age >= 60 ? 'senior' : 'std');
+    var state = {};
+    try { state = JSON.parse(localStorage.getItem(key) || '{}'); } catch (e) { state = {}; }
+    var boxes = document.querySelectorAll('#rx .done input');
+    function refresh() {
+      var total = 0, per = {};
+      for (var i = 0; i < boxes.length; i++) {
+        var k = boxes[i].getAttribute('data-k'), w = k.split('-')[0];
+        if (boxes[i].checked) { total++; per[w] = (per[w] || 0) + 1; }
+        boxes[i].closest('.day').classList.toggle('is-done', boxes[i].checked);
+      }
+      var t = document.getElementById('done-total'); if (t) t.textContent = total;
+      var wk = document.querySelectorAll('#rx .wk-done');
+      for (var j = 0; j < wk.length; j++) wk[j].textContent = per[wk[j].getAttribute('data-w')] || 0;
+    }
+    for (var i = 0; i < boxes.length; i++) {
+      boxes[i].checked = !!state[boxes[i].getAttribute('data-k')];
+      boxes[i].addEventListener('change', function () {
+        state[this.getAttribute('data-k')] = this.checked;
+        try { localStorage.setItem(key, JSON.stringify(state)); } catch (e) {}
+        refresh();
+      });
+    }
+    refresh();
   }
 
   function read() {
