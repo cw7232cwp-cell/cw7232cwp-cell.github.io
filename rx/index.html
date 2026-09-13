@@ -103,6 +103,12 @@
   th { font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
   td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
+  .notice-box { background: var(--surface); border: 1px solid var(--line-strong); border-left: 3px solid var(--brass); border-radius: 3px; padding: clamp(16px, 2.4vw, 22px) clamp(16px, 2.6vw, 24px); }
+  .notice-box h3 { font-family: var(--serif); font-size: 18px; margin-bottom: 12px; color: var(--text); }
+  .notice-box ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .notice-box li { position: relative; padding-left: 20px; color: var(--muted); font-size: 15.5px; }
+  .notice-box li::before { content: ""; position: absolute; left: 4px; top: .72em; width: 6px; height: 6px; border-radius: 50%; background: var(--brass); }
+  .notice-box li b { color: var(--text); font-weight: 500; }
   .tips { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; }
   .tips li { padding-left: 22px; position: relative; color: var(--muted); }
   .tips li::before { content: "—"; position: absolute; left: 0; color: var(--brass); }
@@ -345,6 +351,11 @@
       + '<div class="stat"><b>' + n.water + 'L</b><span>하루 물</span></div>'
       + '</div><p style="margin:12px 0 0;font-size:13.5px;color:var(--muted)">기초대사량 ' + n.bmr + 'kcal, 활동을 더한 하루 소비량 약 ' + n.tdee + 'kcal 기준입니다.</p></div>'
 
+      + '<div class="notice-box"><h3>루틴을 시작하기 전에 꼭 읽어주세요</h3><ul>'
+      + '<li><b>운동이 처음이라면</b> 본격적인 웨이트 트레이닝 전에 반드시 스트레칭을 우선적으로 해주셔야 합니다.</li>'
+      + '<li><b>운동 시작 후 2주간은</b> 스트레칭이 메인이 된 운동을 하셨을 때 효과가 더 좋습니다.</li>'
+      + '<li><b>운동 초보라면</b> 운동 시간은 50분을 넘기지 않게 주의합니다. 부상과 운동 과부하를 막기 위해서입니다.</li>'
+      + '</ul></div>'
       + '<div class="block"><h3>4주 운동 루틴</h3><div class="weeks">' + weeks + '</div>'
       + '<p style="margin:14px 0 0;font-size:14px;color:var(--muted)">유산소: ' + esc(cardio) + ' · 걸음 목표 ' + steps + '</p>'
       + '<p style="margin:10px 0 0;font-size:14px;color:var(--muted)">운동 이름 옆 <span class="vid" style="cursor:default">영상</span>을 누르면 동작을 영상으로 볼 수 있습니다. 더 많은 운동 영상은 <a href="' + CHANNEL + '" target="_blank" rel="noopener">유튜브 박찬웅 채널</a>에 있습니다.</p></div>'
