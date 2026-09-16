@@ -130,6 +130,24 @@
   .cta a { font-size: 15px; font-weight: 500; text-decoration: none; padding: 12px 22px; border-radius: 2px; border: 1px solid var(--brass); color: var(--brass); }
   .cta a.solid { background: var(--brass); color: var(--bg); }
 
+  .inbody { border: 1px solid var(--line-strong); border-radius: 3px; padding: 14px 14px 16px; margin: 4px 0 2px; display: grid; gap: 10px; }
+  .inbody legend { font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; color: var(--brass); padding: 0 6px; }
+  .inbody-lead { margin: 0; font-size: 13.5px; color: var(--muted); }
+  .file-btn { display: block; text-align: center; border: 1px dashed var(--line-strong); border-radius: 3px; padding: 12px; font-size: 14px; color: var(--brass); cursor: pointer; }
+  .file-btn:hover { background: var(--surface); }
+  .ocr-status { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .ocr-status.on { color: var(--brass); }
+  .ocr-status.err { color: #a3442f; }
+  .body-type { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+  .body-type span { font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em; color: var(--brass); border: 1px solid var(--line-strong); border-radius: 999px; padding: 2px 10px; }
+  .bar { display: grid; gap: 7px; margin: 12px 0 0; }
+  .bar-row { display: grid; grid-template-columns: 92px 1fr auto; gap: 10px; align-items: center; font-size: 14px; }
+  .bar-track { position: relative; height: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; }
+  .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--brass); border-radius: 999px; opacity: .55; }
+  .bar-std { position: absolute; top: -3px; bottom: -3px; border-left: 1px dashed var(--line-strong); border-right: 1px dashed var(--line-strong); }
+  .bar-row .num { font-family: var(--mono); font-size: 13px; }
+  .swap td:first-child { white-space: nowrap; }
+
   .caution { font-size: 13.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
   footer { border-top: 1px solid var(--line); padding-block: 30px 44px; color: var(--muted); font-size: 14px; }
   footer a { text-decoration: none; }
@@ -175,6 +193,35 @@
           <input id="weight" type="number" min="35" max="180" value="78" inputmode="numeric">
         </div>
       </div>
+      <fieldset class="inbody">
+        <legend>인바디 결과 (선택)</legend>
+        <p class="inbody-lead">인바디 결과지가 있으면 그에 맞춰 분석하고 식단을 더 정확하게 잡아 드립니다. 없으면 비워두셔도 됩니다.</p>
+        <label class="file-btn" for="inbody-file">인바디 결과지 사진 올리기</label>
+        <input id="inbody-file" type="file" accept="image/*" hidden>
+        <p class="ocr-status" id="ocr-status">사진을 올리면 숫자를 자동으로 읽어 아래 칸을 채웁니다. 읽은 숫자가 결과지와 다르면 직접 고쳐 주세요.</p>
+        <div class="row2">
+          <div class="field">
+            <label for="smm">골격근량 (kg)</label>
+            <input id="smm" type="number" step="0.1" min="10" max="70" inputmode="decimal" placeholder="예: 32.5">
+          </div>
+          <div class="field">
+            <label for="bfm">체지방량 (kg)</label>
+            <input id="bfm" type="number" step="0.1" min="2" max="90" inputmode="decimal" placeholder="예: 18.4">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="pbf">체지방률 (%)</label>
+            <input id="pbf" type="number" step="0.1" min="3" max="65" inputmode="decimal" placeholder="예: 23.6">
+          </div>
+          <div class="field">
+            <label for="bmr-in">기초대사량 (kcal)</label>
+            <input id="bmr-in" type="number" step="1" min="700" max="3000" inputmode="numeric" placeholder="예: 1560">
+          </div>
+        </div>
+        <p class="hint">사진은 이 기기 안에서만 읽고 어디에도 전송하거나 저장하지 않습니다.</p>
+      </fieldset>
+
       <div class="field">
         <label for="exp">운동 경력</label>
         <select id="exp">
@@ -298,7 +345,72 @@
   ];
   var STRETCH_ITEMS = ['고양이-소 자세 10회', '흉추 회전 스트레칭 좌우 10회', '고관절 굴곡근 스트레칭 좌우 30초', '햄스트링 스트레칭 좌우 30초', '광배 스트레칭 좌우 30초', '가슴 스트레칭 좌우 30초'];
 
+  // ── 인바디 분석 ───────────────────────────────────────────────
+  // 표준값: 표준체중(BMI 22 남 / 21 여)에서 성별 표준 체지방률(남 15% · 여 23%)을 뺀 제지방,
+  // 골격근량은 제지방의 약 절반으로 본다. 인바디 결과지의 '표준 범위'와 같은 기준은 아니고 참고용이다.
+  function inbodyStd(v) {
+    var stdW = (v.sex === 'm' ? 22 : 21) * Math.pow(v.height / 100, 2);
+    var stdFatPct = v.sex === 'm' ? 15 : 23;
+    var stdFat = stdW * stdFatPct / 100;
+    return { weight: stdW, fat: stdFat, smm: (stdW - stdFat) * 0.5, pbfLow: v.sex === 'm' ? 10 : 18, pbfHigh: v.sex === 'm' ? 20 : 28 };
+  }
+  function analyze(v) {
+    if (!v.pbf && !v.bfm && !v.smm) return null;
+    var pbf = v.pbf, bfm = v.bfm;
+    if (!bfm && pbf) bfm = v.weight * pbf / 100;
+    if (!pbf && bfm) pbf = bfm / v.weight * 100;
+    if (!bfm) return null;
+    var ffm = Math.max(10, v.weight - bfm);
+    var smm = v.smm || ffm * 0.5;
+    var std = inbodyStd(v);
+    var fatRatio = bfm / std.fat, muscleRatio = smm / std.smm;
+    var type, typeText;
+    if (muscleRatio >= 1.02 && fatRatio <= 1.05) { type = '근육형'; typeText = '근육량이 표준보다 넉넉하고 체지방은 잘 관리되고 있습니다.'; }
+    else if (fatRatio >= 1.2 && muscleRatio < 1.02) { type = '체지방 많은 형'; typeText = '근육량보다 체지방이 많은 편입니다. 근력운동으로 근육을 지키면서 체지방을 줄이는 것이 우선입니다.'; }
+    else if (muscleRatio < 0.9 && fatRatio < 1.1) { type = '근육 부족형'; typeText = '체지방은 많지 않지만 근육량이 적은 편입니다. 잘 먹으면서 근력운동을 늘리는 것이 먼저입니다.'; }
+    else { type = '표준형'; typeText = '근육량과 체지방이 표준 범위 안에 있습니다. 지금 상태를 유지하면서 부족한 쪽을 조금씩 채우면 됩니다.'; }
+    var pbfState = pbf > std.pbfHigh ? '높음' : pbf < std.pbfLow ? '낮음' : '표준';
+    // 4주 목표: 체중의 0.5%/주 감량(감량 목표일 때), 근육 목표면 주 0.1~0.2kg 증가
+    var goalText;
+    if (v.goal === 'fat') {
+      var lose = Math.round(v.weight * 0.005 * 4 * 10) / 10;
+      goalText = '4주 동안 체중 ' + lose + 'kg 감량(주 ' + (Math.round(lose / 4 * 10) / 10) + 'kg)이 적당합니다. 이보다 빨리 빠지면 근육도 함께 빠집니다.';
+    } else if (v.goal === 'muscle') {
+      goalText = '4주 동안 체중 0.4 ~ 0.8kg 증가가 적당합니다. 체중이 이보다 빨리 늘면 체지방이 함께 늘어난 것입니다.';
+    } else {
+      goalText = '4주 동안 체중 변화보다 골격근량이 유지 또는 소폭 증가하는지를 보세요.';
+    }
+    var focus = type === '체지방 많은 형' ? '근력 3 : 유산소 2 비율로, 근육을 지키면서 체지방을 줄입니다.'
+      : type === '근육 부족형' ? '근력 4 : 유산소 1 비율로, 근육을 늘리는 데 집중합니다.'
+      : type === '근육형' ? '지금 루틴을 유지하면서 약한 부위와 유연성을 보완합니다.'
+      : '근력 3 : 유산소 2 비율로 균형 있게 진행합니다.';
+    return {
+      pbf: Math.round(pbf * 10) / 10, bfm: Math.round(bfm * 10) / 10, smm: Math.round(smm * 10) / 10,
+      ffm: Math.round(ffm * 10) / 10, smmGiven: !!v.smm, type: type, typeText: typeText,
+      pbfState: pbfState, std: std, goalText: goalText, focus: focus,
+      fatToLose: Math.max(0, Math.round((bfm - std.fat) * 10) / 10)
+    };
+  }
+
   function calc(v) {
+    var a = analyze(v);
+    if (a) {
+      // 인바디가 있으면 제지방량 기준(Katch-McArdle)으로 계산한다. 측정된 기초대사량이 있으면 그 값을 쓴다.
+      var bmr2 = v.bmrIn || (370 + 21.6 * a.ffm);
+      var af2 = 1.2 + (v.days >= 5 ? 0.28 : v.days === 4 ? 0.24 : v.days === 3 ? 0.2 : 0.16) - (v.sit >= 10 ? 0.04 : v.sit <= 6 ? 0 : 0.02);
+      var tdee2 = bmr2 * af2;
+      var target2 = v.goal === 'fat' ? tdee2 * 0.82 : v.goal === 'muscle' ? tdee2 * 1.08 : tdee2;
+      var protein2 = Math.round(a.ffm * (v.goal === 'muscle' ? 2.2 : v.goal === 'fat' ? 2.2 : 1.8));
+      var fat2 = Math.round(v.weight * 0.8);
+      var carb2 = Math.max(60, Math.round((target2 - protein2 * 4 - fat2 * 9) / 4));
+      return {
+        bmr: Math.round(bmr2), tdee: Math.round(tdee2), kcal: Math.round(target2 / 10) * 10,
+        protein: protein2, fat: fat2, carb: carb2,
+        bmi: (v.weight / Math.pow(v.height / 100, 2)).toFixed(1),
+        water: (Math.round(v.weight * 33 / 100) / 10).toFixed(1),
+        basis: v.bmrIn ? '인바디 측정 기초대사량' : '인바디 제지방량', inbody: a
+      };
+    }
     var bmr = 10 * v.weight + 6.25 * v.height - 5 * v.age + (v.sex === 'm' ? 5 : -161);
     var af = 1.2 + (v.days >= 5 ? 0.28 : v.days === 4 ? 0.24 : v.days === 3 ? 0.2 : 0.16) - (v.sit >= 10 ? 0.04 : v.sit <= 6 ? 0 : 0.02);
     var tdee = bmr * af;
@@ -310,7 +422,37 @@
       bmr: Math.round(bmr), tdee: Math.round(tdee), kcal: Math.round(target / 10) * 10,
       protein: protein, fat: fat, carb: carb,
       bmi: (v.weight / Math.pow(v.height / 100, 2)).toFixed(1),
-      water: (Math.round(v.weight * 33 / 100) / 10).toFixed(1)
+      water: (Math.round(v.weight * 33 / 100) / 10).toFixed(1),
+      basis: '키·몸무게·나이', inbody: null
+    };
+  }
+
+  // ── 한식 위주 하루 식단 ────────────────────────────────────────
+  // 밥 1공기(210g) 약 300kcal · 탄수 65g, 단백질 한 손바닥 약 150kcal · 단백질 22g 기준
+  function mealPlan(n) {
+    var bowls = Math.max(1.5, Math.round((n.carb * 0.72 / 65) * 2) / 2);   // 하루 밥 공기 수(0.5 단위)
+    var palms = Math.max(3, Math.round(n.protein / 22));                    // 단백질 한 손바닥 횟수
+    var b = function (x) { return x === 0.5 ? '1/2공기' : x === 1 ? '1공기' : x === 1.5 ? '1과 1/2공기' : x === 0.75 ? '2/3공기' : x + '공기'; };
+    var morning = bowls >= 3 ? 1 : bowls >= 2 ? 0.75 : 0.5;
+    var lunch = bowls >= 3 ? 1 : bowls >= 2 ? 1 : 0.75;
+    var dinner = Math.max(0.5, Math.round((bowls - morning - lunch) * 2) / 2);
+    var snackP = palms >= 5 ? 1 : 0;
+    var mainP = Math.max(1, Math.round((palms - snackP) / 3));
+    return {
+      bowls: bowls, palms: palms,
+      rows: [
+        ['아침', Math.round(n.kcal * 0.25), '잡곡밥 ' + b(morning) + ' + 달걀찜(달걀 2개) + 나물 한 접시 + 미역국', '아침을 거르면 점심에 몰아 먹게 됩니다. 밥 없이 달걀과 두유만이라도 챙기세요.'],
+        ['점심 (백반 · 구내식당)', Math.round(n.kcal * 0.35), '잡곡밥 ' + b(lunch) + ' + 생선구이나 제육 ' + mainP + '손바닥 + 나물 두 가지 + 김치 + 국은 건더기 위주', '반찬을 먼저 먹고 밥을 나중에 먹습니다. 튀김과 볶음밥은 주 1회까지.'],
+        ['간식', Math.round(n.kcal * 0.1), snackP ? '두유 1팩 + 삶은 달걀 2개 또는 그릭요거트' : '방울토마토와 견과 한 줌(25g)', '오후 4시쯤 먹어두면 저녁 과식을 막습니다.'],
+        ['저녁', Math.round(n.kcal * 0.3), '잡곡밥 ' + b(dinner) + ' + 두부·생선·닭고기 중 ' + mainP + '손바닥 + 쌈채소나 나물 두 주먹 + 된장국', '운동한 날은 밥을 반 공기 더 드셔도 됩니다.']
+      ],
+      swap: [
+        ['단백질 한 손바닥', '달걀 3개 · 두부 반 모 · 닭가슴살 100g · 돼지 앞다리살 100g · 소고기 우둔 100g · 고등어 한 토막 · 오징어 반 마리 · 새우 10마리'],
+        ['밥 2/3공기 대신', '고구마 중간 1개 · 감자 2개 · 통곡물빵 1.5쪽 · 국수 1/3인분 · 떡국떡 한 줌'],
+        ['채소 두 주먹', '상추·깻잎 쌈 · 시금치나 고사리 나물 · 오이와 당근 · 미역국 건더기 · 배추김치(물에 한 번 헹구면 덜 짭니다)'],
+        ['지방 한 번', '들기름 1큰술 · 참기름 1큰술 · 견과 한 줌(25g) · 아보카도 반 개'],
+        ['외식할 때', '백반·생선구이 정식·순두부찌개·비빔밥(밥 2/3, 고추장 절반) · 삼겹살은 상추쌈과 함께 3~4점']
+      ]
     };
   }
 
@@ -439,15 +581,46 @@
       + '<ul>' + tips.join('') + '</ul></div>';
     var cardio = cardioKind + ' (하루 ' + target + '분 이내에 맞춰 시간 배분)';
 
-    var meals = [
-      ['아침', Math.round(n.kcal * 0.3), '달걀 2 — 3개 + 통곡물빵 1쪽 + 방울토마토', '출근 전 단백질을 먼저 채웁니다.'],
-      ['점심 (구내식당)', Math.round(n.kcal * 0.35), '밥 2/3공기 + 고기·생선 반찬 + 나물 두 종류', '국은 건더기 위주로, 튀김은 주 1회까지.'],
-      ['간식', Math.round(n.kcal * 0.1), '그릭요거트 또는 삶은 달걀 2개', '오후 4시 당 떨어질 때 먹습니다.'],
-      ['저녁', Math.round(n.kcal * 0.25), '단백질 한 손바닥 + 채소 두 주먹 + 밥 1/2공기', '운동한 날은 밥을 2/3공기로 늘립니다.']
-    ];
+    var mp = mealPlan(n), meals = mp.rows;
     var mealRows = '';
     for (i = 0; i < meals.length; i++) {
-      mealRows += '<tr><td><b>' + meals[i][0] + '</b><br><span style="color:var(--muted);font-size:13.5px">' + meals[i][3] + '</span></td><td>' + meals[i][2] + '</td><td class="num">' + meals[i][1] + ' kcal</td></tr>';
+      mealRows += '<tr><td><b>' + meals[i][0] + '</b><br><span style="color:var(--muted);font-size:13.5px">' + esc(meals[i][3]) + '</span></td><td>' + esc(meals[i][2]) + '</td><td class="num">' + meals[i][1] + ' kcal</td></tr>';
+    }
+    var swapRows = '';
+    for (i = 0; i < mp.swap.length; i++) {
+      swapRows += '<tr><td><b>' + esc(mp.swap[i][0]) + '</b></td><td>' + esc(mp.swap[i][1]) + '</td></tr>';
+    }
+
+    // 인바디 분석 블록
+    var inbodyHtml = '';
+    if (n.inbody) {
+      var a = n.inbody;
+      var barRow = function (label, val, std, unit, max) {
+        var pct = Math.max(4, Math.min(100, val / max * 100));
+        var s1 = Math.min(100, std * 0.9 / max * 100), s2 = Math.min(100, std * 1.1 / max * 100);
+        return '<div class="bar-row"><span>' + esc(label) + '</span>'
+          + '<span class="bar-track"><span class="bar-fill" style="width:' + pct.toFixed(1) + '%"></span>'
+          + '<span class="bar-std" style="left:' + s1.toFixed(1) + '%;width:' + Math.max(2, s2 - s1).toFixed(1) + '%"></span></span>'
+          + '<span class="num">' + val + unit + '</span></div>';
+      };
+      var maxKg = Math.max(v.weight, a.std.weight) * 1.05;
+      inbodyHtml = '<div class="block"><h3>인바디 분석</h3>'
+        + '<div class="body-type"><span>' + esc(a.type) + '</span><span>체지방률 ' + a.pbf + '% · ' + esc(a.pbfState) + '</span>'
+        + '<span>' + (a.smmGiven ? '골격근량 입력값' : '골격근량 추정값') + '</span></div>'
+        + '<p style="margin:0;color:var(--muted)">' + esc(a.typeText) + '</p>'
+        + '<div class="bar">'
+        + barRow('체중', v.weight, a.std.weight, 'kg', maxKg)
+        + barRow('골격근량', a.smm, a.std.smm, 'kg', maxKg)
+        + barRow('체지방량', a.bfm, a.std.fat, 'kg', maxKg)
+        + '</div>'
+        + '<p style="margin:10px 0 0;font-size:13px;color:var(--muted)">점선 구간이 키에 맞는 표준 범위입니다. 인바디 결과지의 표준 범위와는 조금 다를 수 있습니다.</p>'
+        + '<ul class="tips" style="margin-top:14px">'
+        + '<li><b>제지방량 ' + a.ffm + 'kg</b> 이 값을 기준으로 열량과 단백질을 계산했습니다. 체중 기준보다 정확합니다.</li>'
+        + (a.fatToLose > 0 ? '<li><b>줄이면 좋은 체지방 약 ' + a.fatToLose + 'kg</b> 표준 범위까지의 차이입니다. 한 번에가 아니라 4주씩 나눠서 접근합니다.</li>' : '<li><b>체지방은 표준 범위 안입니다.</b> 지금은 근육량을 지키는 것이 더 중요합니다.</li>')
+        + '<li><b>4주 목표</b> ' + esc(a.goalText) + '</li>'
+        + '<li><b>운동 비중</b> ' + esc(a.focus) + '</li>'
+        + '<li><b>다음 측정</b> 4주 뒤 같은 조건(아침 공복, 화장실 다녀온 뒤)에서 다시 재면 변화를 정확히 볼 수 있습니다.</li>'
+        + '</ul></div>';
     }
 
     var deskHtml = '';
@@ -467,15 +640,21 @@
       + '<div class="stat"><b>' + n.fat + 'g</b><span>지방</span></div>'
       + '<div class="stat"><b>' + n.bmi + '</b><span>체질량지수 BMI</span></div>'
       + '<div class="stat"><b>' + n.water + 'L</b><span>하루 물</span></div>'
-      + '</div><p style="margin:12px 0 0;font-size:13.5px;color:var(--muted)">기초대사량 ' + n.bmr + 'kcal, 활동을 더한 하루 소비량 약 ' + n.tdee + 'kcal 기준입니다.</p></div>'
+      + '</div><p style="margin:12px 0 0;font-size:13.5px;color:var(--muted)">기초대사량 ' + n.bmr + 'kcal, 활동을 더한 하루 소비량 약 ' + n.tdee + 'kcal 기준입니다. (' + esc(n.basis) + ' 기준)</p></div>'
 
+      + inbodyHtml
       + noticeHtml
       + '<div class="block"><h3>4주 운동 루틴</h3><div class="weeks">' + weeks + '</div>'
       + '<p style="margin:14px 0 0;font-size:14px;color:var(--muted)">유산소: ' + esc(cardio) + ' · 걸음 목표 ' + steps + '</p>'
       + '<p style="margin:10px 0 0;font-size:14px;color:var(--muted)">운동 이름 옆 <span class="vid" style="cursor:default">영상</span>을 누르면 동작을 영상으로 볼 수 있습니다. 더 많은 운동 영상은 <a href="' + CHANNEL + '" target="_blank" rel="noopener">유튜브 박찬웅 채널</a>에 있습니다.</p></div>'
 
-      + '<div class="block"><h3>하루 식단 기준</h3><div class="table-wrap"><table><thead><tr><th>끼니</th><th>이렇게 드세요</th><th>열량</th></tr></thead><tbody>'
+      + '<div class="block"><h3>한식 하루 식단 예시</h3>'
+      + '<p style="margin:0 0 12px;color:var(--muted)">하루 밥 약 ' + mp.bowls + '공기, 단백질 반찬 약 ' + mp.palms + '손바닥이 기준입니다. 특별한 식재료 없이 집밥과 구내식당에서 고를 수 있는 것으로 짰습니다.</p>'
+      + '<div class="table-wrap"><table><thead><tr><th>끼니</th><th>이렇게 드세요</th><th>열량</th></tr></thead><tbody>'
       + mealRows + '</tbody></table></div>'
+      + '<h3 style="margin-top:22px">바꿔 먹기 표</h3>'
+      + '<p style="margin:0 0 12px;color:var(--muted)">같은 자리에 아래 것들로 바꿔 드셔도 됩니다. 매일 같은 메뉴를 먹지 않아도 됩니다.</p>'
+      + '<div class="table-wrap"><table class="swap"><tbody>' + swapRows + '</tbody></table></div>'
       + '<ul class="tips" style="margin-top:16px">'
       + '<li><b>먹는 순서를 바꾸세요.</b> 채소와 단백질을 먼저, 밥과 면은 나중에 먹으면 같은 양을 먹어도 덜 부담됩니다.</li>'
       + '<li><b>회식은 다음 날로 갚지 마세요.</b> 굶는 대신 그날 술 한 잔당 물 한 잔, 다음 날은 평소대로 먹습니다.</li>'
@@ -529,9 +708,96 @@
     var g = function (id) { return document.getElementById(id).value; };
     return {
       sex: g('sex'), age: +g('age') || 40, height: +g('height') || 170, weight: +g('weight') || 70,
-      exp: g('exp'), days: +g('days'), goal: g('goal'), sit: +g('sit')
+      exp: g('exp'), days: +g('days'), goal: g('goal'), sit: +g('sit'),
+      smm: +g('smm') || 0, bfm: +g('bfm') || 0, pbf: +g('pbf') || 0, bmrIn: +g('bmr-in') || 0
     };
   }
+
+  // ── 인바디 결과지 사진에서 숫자 읽기 ──────────────────────────
+  // 브라우저 안에서만 처리한다(사진을 서버로 보내지 않음). 잘못 읽을 수 있어 사용자가 확인·수정하게 한다.
+  (function () {
+    var fileInput = document.getElementById('inbody-file');
+    var statusEl = document.getElementById('ocr-status');
+    if (!fileInput) return;
+    var OCR_SRC = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+    function say(msg, kind) { statusEl.textContent = msg; statusEl.className = 'ocr-status' + (kind ? ' ' + kind : ''); }
+    function loadOcr() {
+      return new Promise(function (resolve, reject) {
+        if (window.Tesseract) return resolve(window.Tesseract);
+        var s = document.createElement('script');
+        s.src = OCR_SRC;
+        s.onload = function () { window.Tesseract ? resolve(window.Tesseract) : reject(new Error('no-tesseract')); };
+        s.onerror = function () { reject(new Error('script')); };
+        document.head.appendChild(s);
+      });
+    }
+    // 큰 사진은 줄여야 인식이 빠르다(가로 1600px 기준)
+    function shrink(file) {
+      return new Promise(function (resolve) {
+        var img = new Image(), url = URL.createObjectURL(file);
+        img.onload = function () {
+          var scale = Math.min(1, 1600 / img.width);
+          var c = document.createElement('canvas');
+          c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+          var ctx = c.getContext('2d');
+          ctx.drawImage(img, 0, 0, c.width, c.height);
+          // 흑백 + 대비 강화: 결과지 숫자가 또렷해진다
+          var d = ctx.getImageData(0, 0, c.width, c.height), p = d.data, i, g2;
+          for (i = 0; i < p.length; i += 4) {
+            g2 = (p[i] * 0.299 + p[i + 1] * 0.587 + p[i + 2] * 0.114);
+            g2 = g2 < 140 ? Math.max(0, g2 - 40) : Math.min(255, g2 + 40);
+            p[i] = p[i + 1] = p[i + 2] = g2;
+          }
+          ctx.putImageData(d, 0, 0);
+          URL.revokeObjectURL(url);
+          c.toBlob(function (b) { resolve(b || file); }, 'image/png');
+        };
+        img.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
+        img.src = url;
+      });
+    }
+    function num(text, labels, min, max) {
+      var i, m, re, t = text.replace(/\s+/g, ' ');
+      for (i = 0; i < labels.length; i++) {
+        re = new RegExp(labels[i] + '[^0-9]{0,12}(\\d{1,4}(?:[.,]\\d)?)');
+        m = t.match(re);
+        if (m) {
+          var val = parseFloat(m[1].replace(',', '.'));
+          if (val >= min && val <= max) return val;
+        }
+      }
+      return 0;
+    }
+    function setIf(id, val) {
+      if (!val) return false;
+      var el = document.getElementById(id);
+      el.value = val; return true;
+    }
+    fileInput.addEventListener('change', function () {
+      var file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      say('사진을 읽는 중입니다. 10초에서 30초쯤 걸립니다.', 'on');
+      shrink(file).then(function (blob) {
+        return loadOcr().then(function (T) {
+          return T.recognize(blob, 'kor+eng', { logger: function (m) {
+            if (m.status === 'recognizing text' && m.progress) say('사진을 읽는 중입니다. ' + Math.round(m.progress * 100) + '%', 'on');
+          } });
+        });
+      }).then(function (res) {
+        var text = (res && res.data && res.data.text) || '';
+        var got = [];
+        if (setIf('weight', num(text, ['체중', '몸무게', 'Weight'], 30, 200))) got.push('체중');
+        if (setIf('smm', num(text, ['골격근량', '골격근', 'SMM'], 10, 70))) got.push('골격근량');
+        if (setIf('bfm', num(text, ['체지방량', 'BFM'], 2, 90))) got.push('체지방량');
+        if (setIf('pbf', num(text, ['체지방률', '체지방율', 'PBF'], 3, 65))) got.push('체지방률');
+        if (setIf('bmr-in', num(text, ['기초대사량', 'BMR'], 700, 3000))) got.push('기초대사량');
+        if (got.length) say('읽은 항목: ' + got.join(', ') + '. 결과지와 다르면 직접 고쳐 주세요. 그다음 아래 처방전 발급을 누르세요.', 'on');
+        else say('사진에서 숫자를 찾지 못했습니다. 아래 칸에 직접 입력해 주세요. (밝은 곳에서 결과지를 똑바로 찍으면 더 잘 읽습니다)', 'err');
+      }).catch(function () {
+        say('사진을 읽지 못했습니다. 아래 칸에 직접 입력해 주세요.', 'err');
+      });
+    });
+  })();
   document.getElementById('rx-form').addEventListener('submit', function (e) { e.preventDefault(); render(read()); document.getElementById('rx').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   document.getElementById('print').addEventListener('click', function () { window.print(); });
   render(read());
