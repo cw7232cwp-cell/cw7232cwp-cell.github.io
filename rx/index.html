@@ -200,6 +200,24 @@
   .ai-steps { margin: 0; padding-left: 20px; color: var(--muted); display: grid; gap: 6px; font-size: 15px; }
   .ai-steps b { color: var(--text); font-weight: 500; }
   .ib-prev:not([hidden]) { display: block; max-width: 100%; max-height: 280px; margin-top: 12px; border: 1px solid var(--line); border-radius: 3px; }
+  .ask-wrap { margin-bottom: clamp(20px, 3vw, 28px); }
+  #askCard .rx-head { background: var(--brass-soft); }
+  #askCard textarea { min-height: 96px; font-size: 17px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+  .chip { border: 1px solid var(--line-strong); background: transparent; padding: 6px 12px; font-size: 14px; border-radius: 99px; cursor: pointer; color: var(--muted); font-family: var(--sans); }
+  .chip:hover { border-color: var(--brass); color: var(--brass); }
+  #panel-coach .actions .attach { display: inline-block; cursor: pointer; text-align: center; }
+  .answer { display: grid; gap: 14px; border-top: 2px solid var(--brass); padding-top: 18px; margin-top: 6px; }
+  .answer .q { margin: 0; font-family: var(--serif); font-size: 19px; }
+  .answer + .answer { margin-top: 26px; opacity: .85; }
+  .ex-list { display: grid; margin-top: 14px; border-top: 1px solid var(--line); }
+  .ex-item { padding: 10px 0; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+  .ex-top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .ex-top b { font-weight: 500; }
+  .ex-top .sets { font-family: var(--mono); font-size: 13.5px; color: var(--brass); white-space: nowrap; }
+  .ex-item small { color: var(--muted); font-size: 13.5px; }
+  .ib-manual { border: 1px solid var(--line); border-radius: 3px; padding: 12px 14px; }
+  .ib-manual summary { cursor: pointer; font-size: 14.5px; color: var(--brass); font-weight: 500; }
   .copy-box { width: 100%; min-height: 120px; font-family: var(--mono); font-size: 12.5px; color: var(--text); background: var(--surface); border: 1px solid var(--line-strong); border-radius: 3px; padding: 10px; }
   @media print {
     form, footer, .cta .btns { display: none; }
@@ -224,6 +242,65 @@
 
 <main>
   <section id="panel-coach" role="tabpanel" aria-labelledby="tab-coach">
+    <div class="wrap ask-wrap">
+      <article class="rx" id="askCard">
+        <div class="rx-head">
+          <div><p class="eyebrow">AI COACH · 박찬웅 코칭 방식</p><h2>AI 코치에게 질문하기</h2><div class="sub" id="askSub">내 목표 · 기록 · 인바디에 맞춰 운동과 식단을 처방합니다</div></div>
+        </div>
+        <div class="rx-body">
+          <form id="askForm" class="plain" autocomplete="off">
+            <div class="field" style="margin:0">
+              <label for="askIn">무엇이 고민인가요?</label>
+              <textarea id="askIn" placeholder="예: 뱃살만 빼고 싶어요 / 무릎이 아픈데 하체 운동은요? / 오늘 회식이에요"></textarea>
+            </div>
+            <div class="chips" id="askChips">
+              <button class="chip" type="button">뱃살 빼는 운동 알려주세요</button>
+              <button class="chip" type="button">무릎이 아픈데 하체 운동은요?</button>
+              <button class="chip" type="button">오늘 회식이에요</button>
+              <button class="chip" type="button">배고파서 못 참겠어요</button>
+              <button class="chip" type="button">체중이 안 빠져요</button>
+              <button class="chip" type="button">10분밖에 없어요</button>
+              <button class="chip" type="button">붓기 빼는 법</button>
+              <button class="chip" type="button">촬영 당일 루틴</button>
+            </div>
+            <div class="actions">
+              <button class="btn" type="submit" id="askBtn">코치에게 질문하기</button>
+              <label class="btn ghost attach" for="ibFile">인바디 사진 첨부</label>
+              <input id="ibFile" type="file" accept="image/*" hidden>
+            </div>
+            <img id="ibPrev" class="ib-prev" alt="첨부한 인바디 결과지" hidden>
+            <p class="ocr-status" id="ibStatus">인바디 결과지 사진을 첨부하면 숫자를 읽어 분석해 드려요. 사진은 이 기기 안에서만 읽고 전송하지 않습니다.</p>
+          </form>
+          <div id="ibOut"></div>
+          <div id="answers"></div>
+          <details class="ib-manual" id="ibDetails">
+            <summary>인바디 수치 직접 입력 · 고치기</summary>
+            <div class="row4" style="margin-top:14px">
+              <div class="field"><label for="ibW">체중 kg</label><input id="ibW" type="number" step="0.1" inputmode="decimal" placeholder="92.4"></div>
+              <div class="field"><label for="ibSmm">골격근량 kg</label><input id="ibSmm" type="number" step="0.1" inputmode="decimal" placeholder="46.0"></div>
+              <div class="field"><label for="ibBfm">체지방량 kg</label><input id="ibBfm" type="number" step="0.1" inputmode="decimal" placeholder="13.1"></div>
+              <div class="field"><label for="ibPbf">체지방률 %</label><input id="ibPbf" type="number" step="0.1" inputmode="decimal" placeholder="14.2"></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label for="ibBmr">기초대사량 kcal</label><input id="ibBmr" type="number" step="1" inputmode="numeric" placeholder="2100"></div>
+              <div class="field" style="align-self:end"><button class="btn" type="button" id="ibGo">인바디 분석 보기</button></div>
+            </div>
+          </details>
+          <details class="ib-manual" id="aiMore">
+            <summary>ChatGPT · Claude 앱에서 더 자세히 묻기</summary>
+            <div style="display:grid;gap:14px;margin-top:14px">
+              <p class="hint" style="margin:0">내 목표 · 오늘 처방 · 기록 · 인바디 · 질문을 한 번에 담은 글을 만들어 드려요. AI 앱에 붙여 넣고, 인바디 사진도 같이 올리면 더 자세히 봐 줍니다.</p>
+              <div class="actions">
+                <button class="btn" type="button" id="aiCopy">코칭 질문 복사</button>
+                <a class="btn ghost" href="https://claude.ai/artifact/FHPk2fNHZUGNM432PdBxNC" target="_blank" rel="noopener" style="width:auto;margin-top:0;text-decoration:none;text-align:center">Claude에서 AI 코치 바로 쓰기</a>
+                <span class="c-ok" id="aiMsg"></span>
+              </div>
+              <textarea class="copy-box" id="aiBox" readonly hidden aria-label="코칭 질문"></textarea>
+            </div>
+          </details>
+        </div>
+      </article>
+    </div>
     <div class="wrap layout">
       <form id="cf" autocomplete="off">
         <h2>목표 문진표</h2>
@@ -310,47 +387,6 @@
           </div>
         </article>
 
-        <article class="rx" id="aiCard">
-          <div class="rx-head">
-            <div><p class="eyebrow">AI COACH</p><h2>AI 코치에게 오늘 기록 검사받기</h2><div class="sub">내 목표·오늘 처방·기록을 담은 코칭 질문을 만들어 드립니다</div></div>
-          </div>
-          <div class="rx-body">
-            <div class="block" id="ibBlock">
-              <h3>인바디 사진 분석 <span>사진은 이 기기 안에서만 읽어요</span></h3>
-              <label class="file-btn" for="ibFile">인바디 결과지 사진 넣기</label>
-              <input id="ibFile" type="file" accept="image/*" hidden>
-              <img id="ibPrev" class="ib-prev" alt="올린 인바디 결과지" hidden>
-              <p class="ocr-status" id="ibStatus" style="margin:10px 0">사진을 넣으면 숫자를 자동으로 읽어요. 결과지와 다른 숫자는 직접 고쳐 주세요.</p>
-              <div class="row4">
-                <div class="field"><label for="ibW">체중 kg</label><input id="ibW" type="number" step="0.1" inputmode="decimal" placeholder="92.4"></div>
-                <div class="field"><label for="ibSmm">골격근량 kg</label><input id="ibSmm" type="number" step="0.1" inputmode="decimal" placeholder="46.0"></div>
-                <div class="field"><label for="ibBfm">체지방량 kg</label><input id="ibBfm" type="number" step="0.1" inputmode="decimal" placeholder="13.1"></div>
-                <div class="field"><label for="ibPbf">체지방률 %</label><input id="ibPbf" type="number" step="0.1" inputmode="decimal" placeholder="14.2"></div>
-              </div>
-              <div class="row2">
-                <div class="field"><label for="ibBmr">기초대사량 kcal</label><input id="ibBmr" type="number" step="1" inputmode="numeric" placeholder="2100"></div>
-                <div class="field" style="align-self:end"><button class="btn" type="button" id="ibGo">인바디 분석 보기</button></div>
-              </div>
-              <div id="ibOut"></div>
-            </div>
-            <ol class="ai-steps">
-              <li><b>오늘 기록</b>을 저장합니다.</li>
-              <li>아래 <b>코칭 질문 복사</b>를 누릅니다.</li>
-              <li>ChatGPT나 Claude 앱에 붙여 넣으면 (인바디 사진도 같이 올리면 더 자세히 봐 줍니다) <b>점수 · 잘한 점 · 고칠 점 · 내일 할 일</b>을 받아 볼 수 있습니다.</li>
-            </ol>
-            <div class="field" style="margin:0">
-              <label for="aiAsk">더 묻고 싶은 것 (선택)</label>
-              <input id="aiAsk" type="text" placeholder="예: 오늘 회식인데 뭐 먹어요?">
-            </div>
-            <div class="actions">
-              <button class="btn" type="button" id="aiCopy">코칭 질문 복사</button>
-              <a class="btn ghost" id="aiClaude" href="https://claude.ai/artifact/FHPk2fNHZUGNM432PdBxNC" target="_blank" rel="noopener" style="width:auto;margin-top:0;text-decoration:none;text-align:center">Claude에서 AI 코치 바로 쓰기</a>
-              <span class="c-ok" id="aiMsg"></span>
-            </div>
-            <textarea class="copy-box" id="aiBox" readonly hidden aria-label="코칭 질문"></textarea>
-            <p class="hint" style="margin:0">Claude에서 바로 쓰기는 Claude에 로그인해야 열립니다. 질문 복사는 어떤 AI 앱에서나 쓸 수 있습니다.</p>
-          </div>
-        </article>
 
         <article class="rx">
           <div class="rx-head"><div><h2>체중 변화</h2><div class="sub">목표선과 실제 공복 체중</div></div></div>
@@ -1249,7 +1285,7 @@
       var r = S.days[k];
       return '- ' + k + '(' + wk(k) + '): 체중 ' + (r.weight != null ? r.weight : '?') + 'kg / 물 ' + (r.water != null ? r.water : '?') + 'L / 걸음 ' + (r.steps != null ? r.steps : '?') + ' / 수면 ' + (r.sleep != null ? r.sleep : '?') + 'h\n  식단: ' + (r.meals || '기록 없음').replace(/\n/g, ' / ') + '\n  운동: ' + (r.workout || '-') + ' / 메모: ' + (r.note || '-');
     }).join('\n') || '아직 기록 없음';
-    var extra = $('#aiAsk').value.trim();
+    var extra = $('#askIn').value.trim();
     var ibLines = Object.keys(S.days).sort().filter(function (k) { return S.days[k].inbody; }).map(function (k) { var b = S.days[k].inbody; return '- ' + k + ': 체중 ' + b.weight + 'kg / 골격근량 ' + b.smm + 'kg / 체지방량 ' + b.bfm + 'kg / 체지방률 ' + b.pbf + '% / 기초대사량 ' + b.bmr + 'kcal'; }).join('\n');
     return '너는 18년차 트레이너가 만든 다이어트 코치야. 아래 내 정보와 기록을 보고 오늘 하루를 평가해 줘.\n'
       + '안전 원칙: 이뇨제·변비약·사우나 탈수·단식은 권하지 말 것. 하루 ' + (c.sex === 'm' ? '1,500' : '1,200') + 'kcal 아래로 내리지 말 것. 며칠 사이 빠지는 무게는 대부분 수분이라는 점을 솔직하게 말할 것.\n\n'
@@ -1374,8 +1410,8 @@
         var v = grab(t, f[1], f[2], f[3]); if (v) { $(f[0]).value = v; got.push(f[4]); }
       });
       if (got.length) { ibSay('읽은 항목: ' + got.join(', ') + '. 결과지와 다르면 고친 뒤 인바디 분석 보기를 누르세요.', 'on'); runInbody(); }
-      else ibSay('사진에서 숫자를 찾지 못했습니다. 위 칸에 직접 입력하고 인바디 분석 보기를 눌러 주세요. 밝은 곳에서 결과지를 똑바로 찍으면 더 잘 읽습니다.', 'err');
-    }).catch(function () { ibSay('사진을 읽지 못했습니다. 위 칸에 직접 입력해 주세요.', 'err'); });
+      else { $('#ibDetails').open = true; ibSay('사진에서 숫자를 찾지 못했습니다. 아래 인바디 수치 직접 입력에 적고 인바디 분석 보기를 눌러 주세요. 밝은 곳에서 결과지를 똑바로 찍으면 더 잘 읽습니다.', 'err'); }
+    }).catch(function () { $('#ibDetails').open = true; ibSay('사진을 읽지 못했습니다. 아래 인바디 수치 직접 입력에 적어 주세요.', 'err'); });
   });
   function runInbody() {
     var c = cfg();
@@ -1393,6 +1429,151 @@
     } else ibSay('분석했어요. 목표 문진표를 채우고 코칭 시작을 누르면 결과가 기록에 저장됩니다.', 'on');
   }
   $('#ibGo').addEventListener('click', runInbody);
+
+  // ---------- AI 코치 질문 (박찬웅 코칭 방식 맞춤 컨설팅) ----------
+  function latestInbody() {
+    var ds = Object.keys(S.days).sort().filter(function (d) { return S.days[d].inbody; });
+    return ds.length ? S.days[ds[ds.length - 1]].inbody : null;
+  }
+  function coachCtx() {
+    var c = cfg(), rx = prescribe(c, S.days), cur = lastWeight(S.days, c), n = dleft(c), ib = latestInbody();
+    return { c: c, rx: rx, w: cur.w, n: n, phase: rx.phase, ex: !!c.example, ib: ib, senior: (c.age || 0) >= 60,
+      late: n != null && n >= 0 && n <= 3, protein: ib ? Math.round((ib.weight - ib.bfm) * 2.2) : rx.protein };
+  }
+  // 세트 수는 D-day가 가까우면 줄이고(피로·붓기 관리), 60세 이상이면 무게보다 자세
+  function sets(x, base) { return Math.max(2, base - (x.late ? 1 : 0)) + '세트'; }
+  var INTENTS = [
+    { id: 'dday', kw: ['당일', '촬영날', '촬영 날', '펌핑', '디데이', 'd-day', '대회날', '촬영 전'], build: function (x) {
+      return { title: 'D-day 당일 이렇게 움직이세요',
+        say: ['촬영 3시간 전: 바나나 1개 + 달걀 2개처럼 가볍게 먹습니다. 처음 먹는 음식은 피합니다.', '촬영 1시간 전: 떡 2조각이나 초콜릿 한 조각으로 근육을 채웁니다.', '물은 한 번에 많이 말고 30분마다 몇 모금씩 마십니다.', '촬영 직전 10분 펌핑, 그다음은 숨 고르고 표정 연습.'],
+        ex: [['푸시업', sets(x, 3) + ' × 15회', '가슴 · 어깨 볼륨'], ['밴드 풀어파트', sets(x, 3) + ' × 20회', '등 · 어깨 라인'], ['덤벨 또는 밴드 컬', '2세트 × 15회', '팔 혈관'], ['카프 레이즈', '2세트 × 20회', '종아리 선명하게']],
+        warn: '펌핑은 땀이 날 정도면 충분합니다. 지치면 오히려 몸이 납작해 보입니다.' }; } },
+    { id: 'party', kw: ['회식', '술', '외식', '약속', '모임', '맥주', '소주', '와인', '뷔페'], build: function (x) {
+      return { title: x.late ? '촬영 직전 회식, 피해를 최소로' : '회식은 메뉴만 잘 고르면 됩니다',
+        say: ['고르는 순서: 고기구이 · 회 · 샤브샤브 > 한식 백반 > 중식 · 튀김 · 피자.', '쌈 채소와 고기를 먼저 먹고, 밥 · 냉면 · 볶음밥은 시키지 않습니다.', x.late ? '촬영 3일 안이라 술은 마시지 않는 게 맞습니다. 붓기가 이틀 넘게 갑니다.' : '술은 소주 2잔 또는 맥주 1잔까지. 술 한 잔마다 물 한 잔을 같이 마십니다.', '다음 날 굶지 말고 평소 식단 그대로, 대신 아침 공복 걷기 40분.'],
+        ex: [['회식 전 하체 운동', '스쿼트 · 런지 ' + sets(x, 4), '먹은 탄수화물이 근육으로 먼저 갑니다'], ['다음 날 공복 걷기', '40분', '숨이 조금 찰 정도'], ['다음 날 물', x.rx.water.toFixed(1) + 'L 이상', '붓기 빼기']],
+        warn: '안주로 나오는 튀김 · 전 · 마른안주가 술보다 무섭습니다.' }; } },
+    { id: 'hungry', kw: ['배고', '배 고', '허기', '식욕', '못 참', '폭식', '야식', '입이 심심', '참기 힘'], build: function (x) {
+      return { title: '배고픔은 참는 게 아니라 설계하는 겁니다',
+        say: ['배고프면 먼저 물 500ml, 10분 뒤에도 배고프면 진짜 배고픈 겁니다.', '단백질이 부족하면 계속 배고픕니다. 오늘 목표는 ' + x.protein + 'g, 끼니마다 한 손바닥씩.', '간식은 삶은 달걀 2개 · 그릭요거트 · 오이 · 방울토마토 · 곤약젤리 중에서.', '잠이 6시간보다 적으면 다음 날 식욕이 확 늘어납니다. 오늘은 일찍 주무세요.'],
+        ex: [['식후 걷기', '저녁 먹고 15분', '혈당이 덜 출렁여 야식 생각이 줄어듭니다'], ['배고플 때 스쿼트', '20회 × 2세트', '주의를 돌리는 데 효과가 큽니다']],
+        warn: x.rx.kcal + 'kcal보다 한참 적게 먹고 있다면 배고픈 게 정상입니다. 굶으면 근육이 먼저 빠집니다.' }; } },
+    { id: 'swelling', kw: ['붓기', '부종', '부어', '붓', '나트륨', '짜게'], build: function (x) {
+      return { title: '붓기는 물을 더 마셔야 빠집니다',
+        say: ['물을 줄이면 몸이 물을 붙잡아 더 붓습니다. 오늘 ' + x.rx.water.toFixed(1) + 'L를 나눠 마시세요.', '국물 · 찌개 · 라면 · 김치를 줄이고, 칼륨 많은 바나나 · 토마토 · 오이 · 시금치를 먹습니다.', '소금을 완전히 끊지는 않습니다. 갑자기 끊으면 오히려 몸이 물을 잡습니다.', '자기 전 다리를 벽에 올리고 10분.'],
+        ex: [['카프 레이즈', sets(x, 3) + ' × 25회', '종아리 근육이 다리 물을 위로 올려 줍니다'], ['벽에 다리 올리기', '10분', '자기 전'], ['걷기', '30분', '가볍게']],
+        warn: '한쪽 다리만 붓거나 눌러서 자국이 오래 남으면 병원에 가 보세요.' }; } },
+    { id: 'plateau', kw: ['안 빠', '안빠', '정체', '그대로', '멈췄', '늘었', '쪘', '올랐'], build: function (x) {
+      return { title: '정체기라면 이것부터 확인하세요',
+        say: ['체중은 하루가 아니라 3일 평균으로 봅니다. 짠 음식 · 생리 · 변비만으로 1kg은 왔다 갔다 합니다.', '먹은 걸 정확히 적어 보세요. 소스 · 커피 · 과일 · 견과가 생각보다 큽니다.', '하루 걸음 수를 3,000보 늘립니다. 운동보다 효과가 큰 경우가 많습니다.', x.late ? 'D-day가 가까우니 식단을 더 줄이기보다 붓기 관리에 집중하세요.' : '2주 넘게 그대로라면 하루 탄수화물을 30g만 줄이세요. 그 이상은 줄이지 않습니다.'],
+        ex: [['운동 순서 바꾸기', '근력 → 유산소', '같은 운동만 하면 몸이 적응합니다'], ['인터벌 걷기', '빠르게 1분 · 천천히 2분 × 8회', '주 2회'], ['큰 근육 운동', '스쿼트 · 데드리프트 · 로우 ' + sets(x, 4), '무게를 조금씩 올리세요']],
+        warn: '근력 운동을 막 시작했다면 근육에 물이 차서 체중이 잠깐 늘 수 있습니다. 인바디로 체지방량을 확인하세요.' }; } },
+    { id: 'belly', kw: ['뱃살', '복부', '옆구리', '러브핸들', '복근', '배 나', '배나', '똥배', '아랫배'], build: function (x) {
+      return { title: '뱃살만 빼는 운동은 없지만, 빨리 빼는 순서는 있습니다',
+        say: ['배는 몸 전체 체지방이 빠질 때 마지막에 빠집니다. 그래서 큰 근육 운동 + 걷기가 먼저입니다.', '복근 운동은 뱃살을 태우기보다 배를 단단하게 받쳐 줍니다. 매일 10분이면 충분합니다.', '저녁 탄수화물을 줄이고 술 · 야식을 끊는 게 뱃살에는 운동보다 큽니다.'],
+        ex: [['스쿼트', sets(x, 4) + ' × 12회', '가장 많은 열량을 씁니다'], ['데드버그', '3세트 × 좌우 10회', '허리를 바닥에 붙인 채'], ['플랭크', '3세트 × 40초', '엉덩이가 처지지 않게'], ['사이드 플랭크', '2세트 × 좌우 30초', '옆구리'], ['경사 걷기', '30분', '러닝머신 경사 8 — 10, 속도 5']],
+        warn: '윗몸일으키기를 많이 하면 목과 허리만 아픕니다. 위 운동으로 바꾸세요.' }; } },
+    { id: 'pain', kw: ['아파', '아픈', '아프', '통증', '디스크', '시큰', '다쳤', '부상', '안 좋', '불편'], build: function (x, q) {
+      var knee = /무릎|발목/.test(q), back = /허리|디스크/.test(q), sh = /어깨|손목/.test(q);
+      var ex = [];
+      if (knee || (!back && !sh)) ex = ex.concat([['박스 스쿼트', '3세트 × 12회', '의자에 살짝 앉았다 일어나기, 무릎이 발끝보다 앞으로 나가지 않게'], ['힙 브릿지', '3세트 × 15회', '무릎 부담 없이 엉덩이 · 허벅지 뒤'], ['레그 익스텐션', '가벼운 무게 3세트 × 15회', '아프지 않은 범위까지만'], ['실내 자전거', '20분', '걷기 대신 무릎 부담이 적은 유산소']]);
+      if (back) ex = ex.concat([['버드독', '3세트 × 좌우 10회', '허리가 흔들리지 않게'], ['데드버그', '3세트 × 좌우 10회', '허리를 바닥에 붙이고'], ['힙 브릿지', '3세트 × 15회', '엉덩이 힘으로 허리를 보호']]);
+      if (sh) ex = ex.concat([['밴드 외회전', '3세트 × 15회', '팔꿈치를 옆구리에 붙이고'], ['페이스 풀', '가볍게 3세트 × 15회', '어깨 뒤쪽 강화'], ['머신 체스트 프레스', '가벼운 무게 3세트 × 12회', '바벨 대신 머신']]);
+      return { title: '아픈 곳은 피하고, 주변 근육을 깨웁니다',
+        say: ['아픈 동작은 바로 멈춥니다. 통증을 참고 하는 운동은 없습니다.', knee ? '무릎은 쪼그려 앉기 · 점프 · 계단 뛰기를 피하고, 엉덩이 근육을 키우면 부담이 줄어듭니다.' : back ? '허리는 무거운 데드리프트 · 윗몸일으키기를 피하고, 코어로 허리를 감싸는 운동부터 합니다.' : sh ? '어깨는 머리 위로 드는 동작과 무거운 벤치프레스를 피하고, 어깨 뒤쪽부터 강화합니다.' : '어디가 아픈지 적어 주시면 그 부위에 맞춰 바꿔 드립니다.', x.senior ? '60세 이상이라 머신과 의자를 잡고 하는 운동 위주로 처방했습니다.' : '통증이 없는 날도 무게보다 자세를 먼저 봅니다.'],
+        ex: ex, warn: '붓고 열이 나거나, 밤에도 아프거나, 저린 느낌이 있으면 운동보다 병원이 먼저입니다.' }; } },
+    { id: 'short', kw: ['10분', '15분', '20분', '시간이 없', '시간 없', '바빠', '바쁜', '짧게'], build: function (x) {
+      return { title: '20분이면 충분합니다 · 쉬지 않는 서킷',
+        say: ['아래 5가지를 쉬지 않고 이어서 하면 1라운드, 1분 쉬고 3라운드.', '10분밖에 없으면 2라운드만, 그래도 안 하는 것보다 훨씬 낫습니다.', '출퇴근길 한 정거장 걷기로 걸음 수를 채우세요.'],
+        ex: [['스쿼트', '15회', '하체'], ['푸시업', '10회 (무릎 대고 가능)', '가슴 · 팔'], ['런지', '좌우 10회', '엉덩이'], ['밴드 로우 또는 수건 로우', '15회', '등'], ['플랭크', '30초', '코어']],
+        warn: x.late ? 'D-day가 가까우니 숨이 너무 차지 않게, 2라운드로 마무리하세요.' : '' }; } },
+    { id: 'home', kw: ['집에서', '홈트', '헬스장 못', '기구 없', '맨몸', '출장'], build: function (x) {
+      return { title: '기구 없이 집에서 하는 루틴',
+        say: ['주 ' + (x.c.days || 3) + '회, 하루 30분. 동작 사이 휴식 40초.', '물병 · 가방에 책을 넣으면 덤벨 대신 쓸 수 있습니다.'],
+        ex: [['스쿼트', sets(x, 4) + ' × 15회', '의자 앞에서 앉았다 일어서기'], ['푸시업', sets(x, 3) + ' × 최대', '어려우면 벽 · 무릎'], ['불가리안 스플릿 스쿼트', '3세트 × 좌우 10회', '뒷발을 의자에'], ['수건 로우', '3세트 × 15회', '문고리에 수건을 걸고 당기기'], ['플랭크', '3세트 × 40초', '코어'], ['제자리 걷기 또는 계단', '15분', '마무리 유산소']],
+        warn: '' }; } },
+    { id: 'lower', kw: ['하체', '허벅지', '엉덩이', '힙', '다리', '종아리'], build: function (x) {
+      return { title: '하체 맞춤 루틴',
+        say: ['하체는 몸에서 가장 큰 근육이라 살 빼는 데도 가장 효과적입니다.', x.senior ? '60세 이상은 머신 위주로, 무릎이 발끝보다 나가지 않게만 지키세요.' : '무게는 마지막 2회가 버거운 정도로 고릅니다.'],
+        ex: x.senior ? [['레그 프레스', '3세트 × 15회', '발은 어깨너비'], ['의자 스쿼트', '3세트 × 12회', '의자를 잡고'], ['힙 브릿지', '3세트 × 15회', '엉덩이'], ['카프 레이즈', '3세트 × 20회', '벽 잡고']]
+          : [['스쿼트 (스미스 · 바벨)', sets(x, 4) + ' × 10 — 12회', '엉덩이를 뒤로 빼며 앉기'], ['루마니안 데드리프트', sets(x, 3) + ' × 12회', '허벅지 뒤 · 엉덩이'], ['워킹 런지', '3세트 × 좌우 12보', '엉덩이 라인'], ['레그 컬', '3세트 × 15회', '허벅지 뒤'], ['카프 레이즈', '3세트 × 20회', '종아리']],
+        warn: '' }; } },
+    { id: 'upper', kw: ['상체', '팔', '어깨', '가슴', '등 운동', '등근육', '등 근육', '이두', '삼두', '광배'], build: function (x) {
+      return { title: '상체 맞춤 루틴',
+        say: ['미는 날(가슴 · 어깨 · 삼두)과 당기는 날(등 · 이두)을 나눠서 합니다.', '등을 먼저 키우면 자세가 펴지고 허리가 얇아 보입니다.'],
+        ex: [['랫 풀다운', sets(x, 4) + ' × 12회', '가슴을 펴고 팔꿈치로 당기기'], ['시티드 케이블 로우', sets(x, 3) + ' × 12회', '등 두께'], ['인클라인 덤벨 프레스', sets(x, 3) + ' × 10회', '윗가슴'], ['사이드 레터럴 레이즈', '3세트 × 15회', '어깨 넓이'], ['케이블 푸시다운 · 덤벨 컬', '각 3세트 × 15회', '팔']],
+        warn: '' }; } },
+    { id: 'carb', kw: ['탄수', '밥', '고구마', '빵', '떡', '로딩', '리필'], build: function (x) {
+      var p = x.phase;
+      return { title: p === 'd1' ? 'D-1, 탄수화물을 먹어야 근육이 찹니다' : p === 'final' ? '마무리 구간 탄수화물은 아침 · 운동 전에만' : '탄수화물은 끊지 말고 시간을 정하세요',
+        say: [p === 'd1' ? '오늘 저녁 고구마 2개 또는 밥 1공기를 드세요. 근육에 글리코겐이 차서 몸이 커 보입니다.' : p === 'final' ? '하루 ' + x.rx.carb + 'g 정도로, 아침과 운동 전에만 먹고 저녁은 단백질 · 채소로.' : '오늘 탄수화물 목표 ' + x.rx.carb + 'g. 밥 1공기가 약 65g입니다.', '좋은 탄수화물: 현미밥 · 고구마 · 감자 · 오트밀 · 바나나. 피할 것: 빵 · 면 · 과자 · 음료.', '탄수화물을 0으로 끊으면 힘이 빠지고 근육이 먼저 빠집니다.'],
+        ex: [['운동 전 1시간', '바나나 1개 또는 고구마 반 개', '운동 힘이 납니다'], ['운동 후', '밥 1/2공기 + 단백질', '회복']], warn: '' }; } },
+    { id: 'protein', kw: ['단백질', '프로틴', '보충제', '닭가슴살', '쉐이크', '셰이크'], build: function (x) {
+      return { title: '단백질 하루 ' + x.protein + 'g',
+        say: [x.ib ? '인바디 제지방량 기준(1kg당 2.2g)으로 계산했습니다.' : '체중 1kg당 2g으로 계산했습니다. 인바디 사진을 첨부하면 더 정확해집니다.', '한 끼에 30 — 40g씩 4번 나눠 먹는 게 가장 효과적입니다.', '달걀 1개 6g · 닭가슴살 100g 23g · 그릭요거트 1통 10g · 두부 반 모 15g · 프로틴 1스쿱 25g.', '보충제는 하루 1 — 2번이면 충분합니다. 나머지는 음식으로.'],
+        ex: [['운동 후 30분 안', '프로틴 1스쿱 또는 닭가슴살', '근육 회복']], warn: '신장 질환이 있다면 단백질 양을 의사와 먼저 상의하세요.' }; } },
+    { id: 'cardio', kw: ['유산소', '러닝', '달리기', '걷기', '공복', '사이클', '줄넘기', '천국의 계단'], build: function (x) {
+      return { title: '유산소는 걷기가 기본, 인터벌은 양념',
+        say: ['살 빼는 유산소의 기본은 빠르게 걷기입니다. 숨이 차지만 대화는 되는 속도.', '공복 유산소는 어지럽지 않다면 괜찮습니다. 어지러우면 바나나 반 개 먹고 하세요.', x.late ? 'D-day가 가까우니 땀을 일부러 빼는 긴 유산소는 피하세요. 30분이면 충분합니다.' : '근력 운동 뒤에 하면 같은 시간에 더 많이 태웁니다.'],
+        ex: [['빠르게 걷기 (경사)', x.late ? '30분' : '40분', '경사 8 — 10, 속도 5 — 5.5'], ['인터벌', '빠르게 1분 · 천천히 2분 × 8회', '주 2회만'], ['하루 걸음', x.phase === 'push' ? '10,000보' : '8,000보', '엘리베이터 대신 계단']],
+        warn: x.senior ? '60세 이상은 달리기보다 빠르게 걷기와 실내 자전거를 권합니다.' : '' }; } },
+    { id: 'cheat', kw: ['치팅', '먹고 싶', '라면', '치킨', '피자', '햄버거', '과자', '아이스크림', '디저트', '떡볶이', '케이크'], build: function (x) {
+      return { title: x.late ? '지금은 참을 때, 촬영 끝나고 드세요' : '먹고 싶은 건 계획해서 먹으면 됩니다',
+        say: [x.late ? '촬영 3일 안에 짜고 기름진 음식은 붓기가 이틀 갑니다. 끝나고 먹을 메뉴를 적어 두세요.' : '일주일 21끼 중 2끼는 먹고 싶은 걸 드세요. 계획에 넣으면 폭식이 줄어듭니다.', '먹는다면 점심에, 운동한 날에, 단백질 먼저 먹고 나서.', '대체 메뉴: 라면 → 곤약면 · 쌀국수 / 치킨 → 오븐구이 · 닭가슴살 / 과자 → 구운 김 · 견과 한 줌.'],
+        ex: [['먹은 날 저녁', '걷기 30분', '죄책감 대신 걷기'], ['다음 날', '평소대로 먹기', '굶으면 또 폭식합니다']], warn: '' }; } },
+    { id: 'sleep', kw: ['잠을', '잠이', '수면', '피곤', '못 자', '불면', '피로'], build: function (x) {
+      return { title: '잠이 다이어트의 절반입니다',
+        say: ['7시간보다 적게 자면 다음 날 식욕 호르몬이 늘고 근육 회복이 느려집니다.', '커피는 오후 2시 전까지만.', '자기 1시간 전 휴대폰을 내려놓고, 방은 어둡고 시원하게.'],
+        ex: [['자기 전 스트레칭', '10분', '고관절 · 흉추 · 종아리'], ['피곤한 날 운동', '평소의 70% 무게', '쉬는 것도 운동입니다']], warn: '' }; } },
+    { id: 'inbody', kw: ['인바디', '골격근', '체지방률', '근육량', '체성분'], build: function (x) {
+      var ib = x.ib;
+      return { title: ib ? '내 인바디 기준으로 보면' : '인바디 사진을 첨부해 주세요',
+        say: ib ? ['체중 ' + ib.weight + 'kg 중 체지방 ' + ib.bfm + 'kg, 골격근 ' + ib.smm + 'kg입니다.', '감량 중에는 체중보다 골격근량이 유지되는지를 먼저 봅니다. 줄었다면 단백질과 근력 운동을 늘립니다.', '단백질 하루 ' + x.protein + 'g, 근력 운동 주 ' + (x.c.days || 3) + '회를 지키세요.']
+          : ['위의 인바디 사진 첨부를 누르면 숫자를 읽어 체형 판정과 맞춤 처방을 바로 보여 드립니다.', '사진이 없으면 아래 인바디 수치 직접 입력에 적어도 됩니다.'],
+        ex: [], warn: '' }; } }
+  ];
+  function consult(q) {
+    var x = coachCtx(), t = q.toLowerCase(), hits = INTENTS.filter(function (it) { return it.kw.some(function (k) { return t.indexOf(k) >= 0; }); });
+    // 통증이 있으면 통증 답이 가장 먼저 (부위 루틴과 겹칠 때)
+    hits.sort(function (a, b) { return (b.id === 'pain') - (a.id === 'pain'); });
+    // 아픈 곳이 있으면 일반 부위 루틴은 빼고 통증 맞춤 처방만
+    if (hits.length && hits[0].id === 'pain') hits = hits.filter(function (it) { return it.id !== 'lower' && it.id !== 'upper' && it.id !== 'belly'; });
+    var picks = hits.slice(0, 2).map(function (it) { return it.build(x, q); });
+    if (!picks.length) picks = [{ title: '오늘 처방을 기준으로 답할게요',
+      say: ['지금은 ' + x.rx.title + '입니다. 오늘 ' + x.rx.kcal + 'kcal · 단백질 ' + x.protein + 'g · 물 ' + x.rx.water.toFixed(1) + 'L를 지키세요.', '질문에 부위(뱃살 · 하체 · 팔), 상황(회식 · 시간 없음 · 집), 통증(무릎 · 허리)을 넣어 주시면 그에 맞춰 바꿔 드립니다.', '더 자세한 상담은 아래 ChatGPT · Claude 앱에서 더 자세히 묻기를 눌러 주세요.'],
+      ex: x.rx.workout.map(function (w) { return [w[0], w[1], '']; }), warn: '' }];
+    return { x: x, picks: picks };
+  }
+  function renderAnswer(q, res) {
+    var x = res.x, c = x.c;
+    var who = x.ex ? '목표 문진표를 채우면 내 몸에 맞춰 더 정확하게 처방합니다.'
+      : (c.event || '목표') + ' ' + dlabel(x.n) + ' · 현재 ' + f1(x.w) + 'kg → 목표 ' + f1(c.goalWeight) + 'kg · 오늘 ' + x.rx.kcal + 'kcal · 단백질 ' + x.protein + 'g' + (x.ib ? ' · 인바디 반영' : '');
+    var card = el('div', { class: 'answer' },
+      el('p', { class: 'q' }, el('span', { class: 'ai-tag', text: '질문' }), ' ', q),
+      el('p', { class: 'hint', style: 'margin:0', text: who }),
+      res.picks.map(function (p) {
+        return el('div', { class: 'block' }, el('h3', {}, p.title, el('span', { text: '코치 처방' })),
+          el('ul', { class: 'tips' }, p.say.filter(Boolean).map(function (s) { return el('li', { text: s }); })),
+          p.ex.length ? el('div', { class: 'ex-list' }, p.ex.map(function (r) {
+            return el('div', { class: 'ex-item' }, el('div', { class: 'ex-top' }, el('b', { text: r[0] }), el('span', { class: 'sets', text: r[1] })), r[2] ? el('small', { text: r[2] }) : null);
+          })) : null,
+          p.warn ? el('p', { class: 'note warn', style: 'margin-top:14px', text: p.warn }) : null);
+      }));
+    var box = $('#answers');
+    box.prepend(card);
+    while (box.children.length > 3) box.lastElementChild.remove();
+    card.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'start' });
+  }
+  $('#askForm').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var q = $('#askIn').value.trim();
+    if (!q) { $('#askIn').focus(); return; }
+    renderAnswer(q, consult(q));
+  });
+  $('#askChips').addEventListener('click', function (ev) {
+    if (!ev.target.matches('.chip')) return;
+    $('#askIn').value = ev.target.textContent; renderAnswer(ev.target.textContent, consult(ev.target.textContent));
+  });
 
   // ---------- 이벤트 ----------
   $('#cf').addEventListener('submit', function (ev) {
