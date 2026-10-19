@@ -152,6 +152,54 @@
   footer { border-top: 1px solid var(--line); padding-block: 30px 44px; color: var(--muted); font-size: 14px; }
   footer a { text-decoration: none; }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+  /* ── 탭 + D-day 다이어트 코칭 ── */
+  :root { --brass-soft: #F1E6C8; --good: #2F7A4A; --bad: #B23A2A; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --brass-soft: #2F2817; --good: #6CC48D; --bad: #F07A68; } }
+  :root[data-theme="dark"] { --brass-soft: #2F2817; --good: #6CC48D; --bad: #F07A68; }
+  .tabs { display: flex; margin-top: 26px; margin-bottom: calc(-1 * clamp(34px, 6vw, 62px)); overflow-x: auto; }
+  .tab { appearance: none; background: transparent; border: 1px solid transparent; border-bottom: 0; padding: 12px 20px; font-family: var(--serif); font-weight: 700; font-size: 17px; color: var(--muted); cursor: pointer; white-space: nowrap; border-radius: 3px 3px 0 0; }
+  .tab small { font-family: var(--mono); font-weight: 400; font-size: 11px; letter-spacing: .1em; display: block; color: var(--brass); }
+  .tab[aria-selected="true"] { background: var(--bg); border-color: var(--line); color: var(--text); position: relative; top: 1px; }
+  @media (max-width: 900px) { #panel-coach .layout { grid-template-columns: minmax(0, 1fr); } }
+  #panel-coach .row2 > *, #panel-coach .field, #panel-coach .field input, #panel-coach .field select { min-width: 0; }
+  #panel-coach input[type="date"] { -webkit-appearance: none; appearance: none; min-height: 48px; }
+  #panel-coach .stack { display: grid; gap: clamp(20px, 3vw, 28px); min-width: 0; }
+  #panel-coach form.plain { position: static; background: none; border: 0; padding: 0; border-radius: 0; }
+  #panel-coach .field textarea { font-family: var(--sans); font-size: 16px; color: var(--text); background: var(--panel); border: 1px solid var(--line-strong); border-radius: 3px; padding: 11px 12px; width: 100%; min-height: 92px; resize: vertical; line-height: 1.6; }
+  #panel-coach .row4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 640px) { #panel-coach .row4 { grid-template-columns: 1fr 1fr; } }
+  #panel-coach .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  #panel-coach .actions .btn { width: auto; padding: 13px 20px; margin-top: 0; }
+  #panel-coach .block > h3 { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  #panel-coach .block > h3 span { color: var(--muted); letter-spacing: .06em; text-transform: none; }
+  #panel-coach td { vertical-align: top; }
+  #panel-coach td small { display: block; color: var(--muted); font-size: 13.5px; }
+  .c-err { color: var(--bad); font-size: 14px; margin: 10px 0 0; }
+  .c-ok { color: var(--good); font-size: 14px; }
+  .dday { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px 28px; align-items: end; }
+  .dday .big { font-family: var(--serif); font-weight: 700; font-size: clamp(60px, 11vw, 112px); line-height: .9; color: var(--brass); font-variant-numeric: tabular-nums; }
+  .dday .what { font-family: var(--serif); font-size: 20px; }
+  @media (max-width: 560px) { .dday { grid-template-columns: 1fr; } }
+  .cbar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; margin-top: 14px; }
+  .cbar i { display: block; height: 100%; width: 0; background: var(--brass); transition: width .6s ease; }
+  .cbar-label { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 6px; gap: 8px; }
+  .note { border-left: 3px solid var(--brass); background: var(--brass-soft); padding: 12px 14px; font-size: 14.5px; border-radius: 0 3px 3px 0; margin: 0; }
+  .note.warn { border-left-color: var(--bad); }
+  .down { color: var(--good); } .up { color: var(--bad); }
+  .chart { width: 100%; height: auto; display: block; }
+  .legend { display: flex; gap: 18px; font-size: 12.5px; color: var(--muted); margin-top: 6px; flex-wrap: wrap; }
+  .legend i { display: inline-block; width: 18px; height: 0; border-top: 3px solid var(--text); vertical-align: middle; margin-right: 6px; }
+  .legend i.t { border-top: 2px dashed var(--brass); }
+  .empty { border: 1px dashed var(--line-strong); border-radius: 3px; padding: 16px; color: var(--muted); font-size: 14.5px; }
+  .showcase .rx-head { background: var(--brass-soft); }
+  .mini { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+  .mini b { display: block; font-family: var(--serif); font-size: 30px; color: var(--brass); line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .mini span { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .06em; }
+  .ai-tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; color: var(--bg); background: var(--brass); padding: 2px 7px; border-radius: 2px; vertical-align: middle; }
+  .ai-steps { margin: 0; padding-left: 20px; color: var(--muted); display: grid; gap: 6px; font-size: 15px; }
+  .ai-steps b { color: var(--text); font-weight: 500; }
+  .copy-box { width: 100%; min-height: 120px; font-family: var(--mono); font-size: 12.5px; color: var(--text); background: var(--surface); border: 1px solid var(--line-strong); border-radius: 3px; padding: 10px; }
   @media print {
     form, footer, .cta .btns { display: none; }
     body { background: #fff; color: #000; }
@@ -162,14 +210,147 @@
 <header class="top">
   <div class="wrap">
     <p class="eyebrow">팀보노짐 · 수원 권선동 24시간 헬스장</p>
-    <h1>앉아서 일하는 사람을 위한<br><em>운동 처방전</em></h1>
-    <p>하루 여덟 시간 책상에 앉아 있는 공무원과 직장인을 위해, 17년 경력 트레이너가 쓰는 방식 그대로 4주 운동 루틴과 식단 기준을 만들어 드립니다. 키와 나이, 운동 경력, 일주일에 낼 수 있는 시간만 적으면 됩니다.</p>
+    <h1 id="hero-title">앉아서 일하는 사람을 위한<br><em>운동 처방전</em></h1>
+    <p id="hero-lead">하루 여덟 시간 책상에 앉아 있는 공무원과 직장인을 위해, 17년 경력 트레이너가 쓰는 방식 그대로 4주 운동 루틴과 식단 기준을 만들어 드립니다. 키와 나이, 운동 경력, 일주일에 낼 수 있는 시간만 적으면 됩니다.</p>
     <div class="principles"><span>안 다치고</span><span>어렵지 않고</span><span>재밌게</span><span>오래</span></div>
     <div class="stamp">처방 · 팀보노짐 박찬웅</div>
+    <div class="tabs" role="tablist" aria-label="처방 종류">
+      <button class="tab" role="tab" id="tab-coach" aria-controls="panel-coach" aria-selected="true"><small>NEW · D-DAY</small>AI 다이어트 코칭</button>
+      <button class="tab" role="tab" id="tab-rx" aria-controls="panel-rx" aria-selected="false" tabindex="-1"><small>4 WEEKS</small>4주 운동 처방전</button>
+    </div>
   </div>
 </header>
 
 <main>
+  <section id="panel-coach" role="tabpanel" aria-labelledby="tab-coach">
+    <div class="wrap layout">
+      <form id="cf" autocomplete="off">
+        <h2>목표 문진표</h2>
+        <div class="row2">
+          <div class="field"><label for="cSex">성별</label><select id="cSex"><option value="m">남성</option><option value="f">여성</option></select></div>
+          <div class="field"><label for="cAge">나이</label><input id="cAge" type="number" min="15" max="80" value="38" inputmode="numeric"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="cHeight">키 (cm)</label><input id="cHeight" type="number" min="130" max="210" value="175" inputmode="numeric"></div>
+          <div class="field"><label for="cStart">시작 체중 (kg)</label><input id="cStart" type="number" step="0.1" min="35" max="200" value="78" inputmode="decimal"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="cGoal">목표 체중 (kg)</label><input id="cGoal" type="number" step="0.1" min="35" max="200" value="74" inputmode="decimal"></div>
+          <div class="field"><label for="cDays">주 운동 횟수</label><select id="cDays"><option value="2">주 2회</option><option value="3" selected>주 3회</option><option value="4">주 4회</option><option value="5">주 5회 이상</option></select></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="cStartDate">시작일</label><input id="cStartDate" type="date"></div>
+          <div class="field"><label for="cDate">D-day</label><input id="cDate" type="date"></div>
+        </div>
+        <div class="field"><label for="cEvent">무엇을 준비하나요</label><input id="cEvent" type="text" value="바디프로필 촬영" maxlength="30"></div>
+        <button class="btn" type="submit" id="cSave">코칭 시작</button>
+        <p class="hint">기록은 이 기기의 브라우저에만 저장되고 어디에도 전송하지 않습니다.</p>
+        <p class="c-err" id="cErr" hidden></p>
+      </form>
+
+      <div class="stack">
+        <article class="rx showcase" id="showcase" hidden>
+          <div class="rx-head">
+            <div><p class="eyebrow">영상 속 실제 기록</p><h2 id="scTitle">박찬웅 코치의 도전기</h2><div class="sub" id="scSub"></div></div>
+            <div class="badge" id="scBadge">LIVE</div>
+          </div>
+          <div class="rx-body">
+            <div class="mini" id="scMini"></div>
+            <div id="scChart"></div>
+            <p class="note" id="scVerdict" hidden></p>
+          </div>
+        </article>
+
+        <article class="rx" id="board">
+          <div class="rx-head">
+            <div><h2 id="bTitle">D-day 다이어트 처방</h2><div class="sub" id="bSub">문진표를 채우고 코칭 시작을 누르세요</div></div>
+            <div class="badge" id="bBadge">예시</div>
+          </div>
+          <div class="rx-body">
+            <div class="dday">
+              <div class="big" id="bD">D-?</div>
+              <div>
+                <div class="what" id="bWhat"></div>
+                <div class="cbar" role="progressbar" aria-label="목표 달성률" aria-valuemin="0" aria-valuemax="100" id="bBar"><i id="bBarI"></i></div>
+                <div class="cbar-label"><span id="bS">시작</span><span id="bP">0%</span><span id="bG">목표</span></div>
+              </div>
+            </div>
+            <div class="stats" id="bStats"></div>
+            <p class="note" id="bReal"></p>
+          </div>
+        </article>
+
+        <article class="rx" id="today">
+          <div class="rx-head"><div><h2>오늘의 처방</h2><div class="sub" id="tSub"></div></div></div>
+          <div class="rx-body" id="tBody"></div>
+        </article>
+
+        <article class="rx" id="check">
+          <div class="rx-head"><div><h2>오늘 기록</h2><div class="sub" id="kSub"></div></div></div>
+          <div class="rx-body">
+            <form id="kf" class="plain" autocomplete="off">
+              <div class="row4">
+                <div class="field"><label for="kWeight">공복 체중 kg</label><input id="kWeight" type="number" step="0.1" inputmode="decimal" placeholder="--.-"></div>
+                <div class="field"><label for="kWater">물 L</label><input id="kWater" type="number" step="0.1" inputmode="decimal" placeholder="2.5"></div>
+                <div class="field"><label for="kSteps">걸음 수</label><input id="kSteps" type="number" step="100" inputmode="numeric" placeholder="8000"></div>
+                <div class="field"><label for="kSleep">수면 시간</label><input id="kSleep" type="number" step="0.5" inputmode="decimal" placeholder="7"></div>
+              </div>
+              <div class="field"><label for="kMeals">먹은 것 (시간 + 메뉴)</label><textarea id="kMeals" placeholder="08:00 달걀 3개, 고구마 1개&#10;12:30 불고기 김밥 1줄, 제로콜라&#10;19:00 닭가슴살 샐러드"></textarea></div>
+              <div class="row2">
+                <div class="field"><label for="kWorkout">운동</label><input id="kWorkout" type="text" placeholder="하체 50분 + 걷기 30분"></div>
+                <div class="field"><label for="kNote">컨디션 · 메모</label><input id="kNote" type="text" placeholder="오후에 배고픔 심함"></div>
+              </div>
+              <div class="actions">
+                <button class="btn" type="submit" id="kSave">기록 저장</button>
+                <span class="c-ok" id="kMsg"></span>
+              </div>
+              <p class="c-err" id="kErr" hidden></p>
+            </form>
+          </div>
+        </article>
+
+        <article class="rx" id="aiCard">
+          <div class="rx-head">
+            <div><p class="eyebrow">AI COACH</p><h2>AI 코치에게 오늘 기록 검사받기</h2><div class="sub">내 목표·오늘 처방·기록을 담은 코칭 질문을 만들어 드립니다</div></div>
+          </div>
+          <div class="rx-body">
+            <ol class="ai-steps">
+              <li><b>오늘 기록</b>을 저장합니다.</li>
+              <li>아래 <b>코칭 질문 복사</b>를 누릅니다.</li>
+              <li>ChatGPT나 Claude 앱에 붙여 넣으면 <b>점수 · 잘한 점 · 고칠 점 · 내일 할 일</b>을 받아 볼 수 있습니다.</li>
+            </ol>
+            <div class="field" style="margin:0">
+              <label for="aiAsk">더 묻고 싶은 것 (선택)</label>
+              <input id="aiAsk" type="text" placeholder="예: 오늘 회식인데 뭐 먹어요?">
+            </div>
+            <div class="actions">
+              <button class="btn" type="button" id="aiCopy">코칭 질문 복사</button>
+              <a class="btn ghost" id="aiClaude" href="https://claude.ai/artifact/FHPk2fNHZUGNM432PdBxNC" target="_blank" rel="noopener" style="width:auto;margin-top:0;text-decoration:none;text-align:center">Claude에서 AI 코치 바로 쓰기</a>
+              <span class="c-ok" id="aiMsg"></span>
+            </div>
+            <textarea class="copy-box" id="aiBox" readonly hidden aria-label="코칭 질문"></textarea>
+            <p class="hint" style="margin:0">Claude에서 바로 쓰기는 Claude에 로그인해야 열립니다. 질문 복사는 어떤 AI 앱에서나 쓸 수 있습니다.</p>
+          </div>
+        </article>
+
+        <article class="rx">
+          <div class="rx-head"><div><h2>체중 변화</h2><div class="sub">목표선과 실제 공복 체중</div></div></div>
+          <div class="rx-body">
+            <div id="chartBox"></div>
+            <div class="block"><h3>날짜별 기록</h3><div class="table-wrap" id="logBox"><div class="empty">오늘 기록을 저장하면 날짜별로 쌓입니다.</div></div></div>
+          </div>
+        </article>
+
+        <div class="cta"><strong>혼자 하기 어렵다면</strong>
+          <div>처방대로 했는데 정체가 오거나, 촬영·대회처럼 날짜가 정해진 목표가 있다면 박찬웅 코치가 직접 봐 드립니다. 팀보노짐은 24시간 운영하고 PT를 강요하지 않습니다.</div>
+          <div class="btns"><a class="solid" href="https://talk.naver.com/WCSB53" target="_blank" rel="noopener">네이버 톡톡으로 1:1 코칭 문의</a><a href="tel:0312217522">031-221-7522</a></div>
+        </div>
+        <p class="caution">이 처방은 일반적인 운동·식단 기준을 계산한 참고 자료이며 의학적 진단이 아닙니다. 이뇨제·변비약·사우나 탈수·단식은 권하지 않습니다. 18세 미만, 임신 중이거나 질환이 있다면 의사와 먼저 상담하세요. 어지럼·두근거림이 생기면 바로 멈추고 식사를 늘리세요.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="panel-rx" role="tabpanel" aria-labelledby="tab-rx" hidden>
   <div class="wrap layout">
     <form id="rx-form" autocomplete="off">
       <h2>문진표</h2>
@@ -265,6 +446,7 @@
       <!-- 스크립트가 채웁니다 -->
     </article>
   </div>
+  </section>
 </main>
 
 <footer>
@@ -801,5 +983,300 @@
   document.getElementById('rx-form').addEventListener('submit', function (e) { e.preventDefault(); render(read()); document.getElementById('rx').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   document.getElementById('print').addEventListener('click', function () { window.print(); });
   render(read());
+})();
+</script>
+<script>
+/* ── 탭: AI 다이어트 코칭 / 4주 운동 처방전 ── */
+(function () {
+  var tabs = [document.getElementById('tab-coach'), document.getElementById('tab-rx')];
+  var panels = { 'tab-coach': document.getElementById('panel-coach'), 'tab-rx': document.getElementById('panel-rx') };
+  var h1 = document.getElementById('hero-title'), lead = document.getElementById('hero-lead');
+  var HERO = {
+    'tab-coach': ['D-day까지 매일 처방하는<br><em>다이어트 코칭</em>', '목표 체중과 날짜만 정하면 18년 경력 트레이너가 쓰는 방식 그대로 오늘 먹을 것과 할 운동을 처방합니다. 매일 아침 체중과 식단을 기록하고, AI 코치에게 검사받으세요.'],
+    'tab-rx': [h1.innerHTML, lead.innerHTML]
+  };
+  function select(t, focus) {
+    tabs.forEach(function (x) { var on = x === t; x.setAttribute('aria-selected', on); x.tabIndex = on ? 0 : -1; panels[x.id].hidden = !on; });
+    h1.innerHTML = HERO[t.id][0]; lead.innerHTML = HERO[t.id][1];
+    if (focus) t.focus();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { select(t); history.replaceState(null, '', t.id === 'tab-rx' ? '#rx' : '#coach'); });
+    t.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); select(tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length], true); }
+    });
+  });
+  select(location.hash === '#rx' ? tabs[1] : tabs[0]);
+})();
+
+/* ── D-day 다이어트 코칭 (기록은 이 브라우저에만 저장) ── */
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  var LSKEY = 'bono-dday-coach-v1';
+  var S = { cfg: null, days: {}, journey: null };
+  var REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function today() { return new Date().toLocaleDateString('sv-SE'); }
+  function dnum(s) { return Date.parse(s + 'T00:00:00'); }
+  function diff(a, b) { return Math.round((dnum(b) - dnum(a)) / 864e5); }
+  function addDays(s, n) { return new Date(dnum(s) + n * 864e5).toLocaleDateString('sv-SE'); }
+  function md(s) { var p = s.split('-'); return (+p[1]) + '/' + (+p[2]); }
+  function wk(s) { return '일월화수목금토'[new Date(dnum(s)).getDay()]; }
+  function num(v) { return v === '' || v == null || isNaN(+v) ? null : +v; }
+  function f1(v) { return v == null ? '--' : (+v).toFixed(1); }
+  function el(tag, props) {
+    var e = document.createElement(tag), k, kids = Array.prototype.slice.call(arguments, 2);
+    props = props || {};
+    for (k in props) { if (k === 'class') e.className = props[k]; else if (k === 'text') e.textContent = props[k]; else e.setAttribute(k, props[k]); }
+    (function add(list) { list.forEach(function (x) { if (x == null || x === false) return; if (Array.isArray(x)) add(x); else e.append(x); }); })(kids);
+    return e;
+  }
+  function show(id, msg) { var e = $(id); e.textContent = msg || ''; e.hidden = !msg; }
+  function stat(v, label) { return el('div', { class: 'stat' }, el('b', { text: v }), el('span', { text: label })); }
+
+  function exampleCfg() {
+    var t = today();
+    return { sex: 'm', age: 38, height: 175, startWeight: 78, goalWeight: 74, days: 3, startDate: t, ddate: addDays(t, 28), event: '바디프로필 촬영', example: true };
+  }
+  function cfg() { return S.cfg || exampleCfg(); }
+
+  // 4주 처방전과 같은 열량 공식
+  function calcEnergy(v) {
+    var bmr = 10 * v.weight + 6.25 * v.height - 5 * v.age + (v.sex === 'm' ? 5 : -161);
+    var af = 1.2 + (v.days >= 5 ? 0.28 : v.days === 4 ? 0.24 : v.days === 3 ? 0.2 : 0.16) - 0.02;
+    return { bmr: Math.round(bmr), tdee: Math.round(bmr * af) };
+  }
+  function lastWeight(days, c) {
+    var ds = Object.keys(days).sort().filter(function (d) { return num(days[d].weight) != null; });
+    return ds.length ? { w: +days[ds[ds.length - 1]].weight, d: ds[ds.length - 1] } : { w: num(c.startWeight), d: null };
+  }
+  function dleft(c) { return c.ddate ? diff(today(), c.ddate) : null; }
+  function dlabel(n) { return n == null ? 'D-?' : n > 0 ? 'D-' + n : n === 0 ? 'D-DAY' : 'D+' + (-n); }
+
+  function prescribe(c, days) {
+    var cur = lastWeight(days, c).w || c.startWeight || 70;
+    var e = calcEnergy({ sex: c.sex, weight: cur, height: c.height || 170, age: c.age || 40, days: +c.days || 3 });
+    var floor = c.sex === 'm' ? 1500 : 1200, n = dleft(c);
+    var phase = n == null ? 'steady' : n < 0 ? 'after' : n === 0 ? 'dday' : n === 1 ? 'd1' : n <= 3 ? 'final' : n <= 14 ? 'push' : 'steady';
+    var def = { steady: 0.8, push: 0.75, final: 0.75, d1: 0.9, dday: 0.85, after: 1.0 }[phase];
+    var kcal = Math.max(floor, Math.round(e.tdee * def / 10) * 10);
+    var protein = Math.round(cur * (phase === 'after' ? 1.6 : 2.0));
+    var fat = Math.round(cur * (phase === 'd1' ? 0.5 : 0.7));
+    var carb = Math.max(phase === 'final' ? 60 : 80, Math.round((kcal - protein * 4 - fat * 9) / 4));
+    var water = Math.round(cur * (phase === 'final' ? 45 : 38) / 100) / 10;
+    if (phase === 'dday') water = Math.min(water, 2.0);
+    var P = {
+      steady: { title: '꾸준히 빼는 구간', rules: ['아침 공복 체중은 매일 같은 시간에 잽니다', '단백질을 끼니마다 한 손바닥씩', '저녁 탄수화물은 밥 1/2공기까지', '하루 8,000보 이상'],
+        workout: [['근력 운동', '주 ' + (c.days || 3) + '회, 4주 운동 처방전 루틴대로 50분'], ['유산소', '근력 운동 뒤 빠르게 걷기 25분']] },
+      push: { title: '속도를 올리는 구간', rules: ['야식·술은 D-day까지 멈춥니다', '국물·찌개는 건더기만 먹습니다', '물은 목표량의 3분의 2를 오후 6시 전에', '하루 10,000보 이상'],
+        workout: [['근력 운동', '큰 근육 위주 50분, 무게는 유지하고 휴식 60초'], ['유산소', '공복 또는 운동 뒤 빠르게 걷기 30 — 40분']] },
+      final: { title: '마무리 구간 (붓기 관리)', rules: ['밀가루·튀김·과자는 먹지 않습니다', '짠 음식은 줄이되 소금을 완전히 끊지는 않습니다', '물은 충분히 마십니다. 물을 줄이면 오히려 붓습니다', '잠은 7시간 이상'],
+        workout: [['근력 운동', '가벼운 무게 고반복 45분, 땀을 일부러 빼지 않습니다'], ['유산소', '걷기 30분']] },
+      d1: { title: 'D-1 · 근육 채우는 날', rules: ['저녁에 고구마·밥 같은 탄수화물을 평소만큼 먹어 근육을 채웁니다', '새로운 음식은 먹지 않습니다', '짠 음식·술 금지', '일찍 잡니다'],
+        workout: [['가벼운 운동', '전신 가볍게 30분, 근육통이 남지 않게'], ['스트레칭', '자기 전 10분']] },
+      dday: { title: 'D-DAY · 오늘이 그날', rules: ['촬영 2 — 3시간 전 가볍게 먹습니다 (바나나·떡·달걀)', '물은 조금씩 나눠 마십니다', '촬영 직전 펌핑 10분', '긴장되면 천천히 숨 쉬기'],
+        workout: [['펌핑', '푸시업·밴드 운동 3 — 4세트, 10분'], ['쉬기', '무리한 운동 금지']] },
+      after: { title: '끝난 뒤 · 요요 막기', rules: ['일주일은 평소 식단으로 천천히 돌아갑니다', '폭식 대신 먹고 싶던 음식 한 끼만', '운동 습관은 주 3회 유지', '체중은 주 1회만 잽니다'],
+        workout: [['근력 운동', '주 3회 4주 운동 처방전 루틴'], ['걷기', '하루 7,000보']] }
+    }[phase];
+    var meals = phase === 'dday'
+      ? [['아침', '바나나 1개 + 삶은 달걀 2개', '촬영 2 — 3시간 전'], ['촬영 전', '떡 2조각 또는 초콜릿 한 조각', '펌핑 직전 근육을 채웁니다'], ['촬영 후', '먹고 싶던 음식 한 끼', '수고했어요']]
+      : [['아침', phase === 'd1' ? '달걀 3개 + 고구마 1개' : '달걀 3개 + 고구마 반 개 + 방울토마토', '하루 시작은 단백질부터'],
+         ['점심', phase === 'final' ? '닭가슴살·생선 + 현미밥 1/3공기 + 나물' : '고기·생선 반찬 + 밥 2/3공기 + 나물 두 가지', '편의점이라면 닭가슴살 + 삼각김밥 1개'],
+         ['간식', '그릭요거트 또는 단백질 음료', '오후 4시 배고플 때'],
+         ['저녁', phase === 'd1' ? '소고기·연어 + 밥 1공기 또는 고구마 2개' : '단백질 한 손바닥 + 채소 두 주먹' + (phase === 'final' ? '' : ' + 밥 1/2공기'), phase === 'd1' ? '근육을 채우는 탄수화물' : '자기 3시간 전까지']];
+    return { phase: phase, title: P.title, kcal: kcal, protein: protein, carb: carb, fat: fat, water: water, rules: P.rules, workout: P.workout, meals: meals, tdee: e.tdee };
+  }
+
+  function realism(c, days) {
+    var cur = lastWeight(days, c).w, n = dleft(c), gw = num(c.goalWeight);
+    if (cur == null || gw == null || n == null) return '';
+    var left = cur - gw;
+    if (left <= 0) return '목표 체중에 도착했어요. 이제는 지키는 게 목표입니다.';
+    if (n <= 0) return 'D-day가 지났어요. 날짜를 새로 정하면 다시 처방합니다.';
+    var fatMax = cur * 0.01 * (n / 7), waterBonus = Math.min(2, cur * 0.02);
+    var msg = '남은 ' + left.toFixed(1) + 'kg을 ' + n + '일 동안 빼려면 하루 ' + (left / n).toFixed(2) + 'kg 페이스입니다. ';
+    if (left <= fatMax) msg += '건강하게 가능한 속도예요.';
+    else if (left <= fatMax + waterBonus) msg += '빠듯하지만 가능합니다. 다만 며칠 안에 빠지는 무게의 상당 부분은 지방이 아니라 수분과 글리코겐이에요.';
+    else msg += '이 기간에 지방만으로는 어려운 목표예요. 굶지 말고 목표를 ' + Math.max(gw, cur - fatMax - waterBonus).toFixed(1) + 'kg 정도로 잡거나 날짜를 늘리세요.';
+    return msg;
+  }
+
+  // ---------- 저장 ----------
+  function load() { try { var o = JSON.parse(localStorage.getItem(LSKEY) || 'null'); if (o) { S.cfg = o.cfg || null; S.days = o.days || {}; } } catch (e) {} }
+  function save() { try { localStorage.setItem(LSKEY, JSON.stringify({ cfg: S.cfg, days: S.days })); return true; } catch (e) { return false; } }
+
+  // ---------- 렌더 ----------
+  function fillForm() {
+    var c = cfg();
+    $('#cSex').value = c.sex || 'm'; $('#cAge').value = c.age != null ? c.age : ''; $('#cHeight').value = c.height != null ? c.height : '';
+    $('#cStart').value = c.startWeight != null ? c.startWeight : ''; $('#cGoal').value = c.goalWeight != null ? c.goalWeight : ''; $('#cDays').value = String(c.days || 3);
+    $('#cStartDate').value = c.startDate || today(); $('#cDate').value = c.ddate || ''; $('#cEvent').value = c.event || '';
+    $('#cSave').textContent = S.cfg ? '처방 다시 계산' : '코칭 시작';
+  }
+  function fillCheck() {
+    var d = S.days[today()] || {};
+    [['#kWeight', 'weight'], ['#kWater', 'water'], ['#kSteps', 'steps'], ['#kSleep', 'sleep'], ['#kMeals', 'meals'], ['#kWorkout', 'workout'], ['#kNote', 'note']]
+      .forEach(function (p) { $(p[0]).value = d[p[1]] != null ? d[p[1]] : ''; });
+  }
+  function renderBoard() {
+    var c = cfg(), cur = lastWeight(S.days, c), n = dleft(c), sw = num(c.startWeight), gw = num(c.goalWeight), rx = prescribe(c, S.days);
+    $('#bTitle').textContent = (c.event || '목표') + '까지';
+    $('#bSub').textContent = (c.sex === 'm' ? '남성' : '여성') + ' · ' + (c.age || '?') + '세 · ' + (c.height || '?') + 'cm · 주 ' + (c.days || 3) + '회 운동' + (c.ddate ? ' · D-day ' + md(c.ddate) + '(' + wk(c.ddate) + ')' : '');
+    $('#bBadge').textContent = c.example ? '예시 화면' : rx.title;
+    $('#bD').textContent = dlabel(n);
+    $('#bWhat').textContent = c.example ? '문진표를 내 정보로 바꾸고 코칭 시작을 누르세요' : rx.title;
+    var pct = 0;
+    if (sw != null && gw != null && cur.w != null && sw !== gw) pct = Math.max(0, Math.min(100, (sw - cur.w) / (sw - gw) * 100));
+    $('#bBarI').style.width = pct + '%'; $('#bBar').setAttribute('aria-valuenow', Math.round(pct));
+    $('#bS').textContent = '시작 ' + f1(sw) + 'kg'; $('#bP').textContent = Math.round(pct) + '%'; $('#bG').textContent = '목표 ' + f1(gw) + 'kg';
+    var left = cur.w != null && gw != null ? Math.max(0, cur.w - gw) : null;
+    $('#bStats').replaceChildren(stat(f1(cur.w), cur.d ? '현재 체중 · ' + md(cur.d) : '현재 체중 (kg)'), stat(f1(gw), '목표 체중 (kg)'),
+      stat(left == null ? '--' : left.toFixed(1), '남은 무게 (kg)'), stat(n != null && n > 0 && left != null ? (left / n).toFixed(2) : '--', '하루 페이스 (kg)'));
+    var r = realism(c, S.days); $('#bReal').textContent = r; $('#bReal').hidden = !r;
+    $('#bReal').className = 'note' + (/어려운|지났/.test(r) ? ' warn' : '');
+  }
+  function renderToday() {
+    var c = cfg(), t = today(), rx = prescribe(c, S.days), box = $('#tBody');
+    $('#tSub').textContent = md(t) + '(' + wk(t) + ') · ' + dlabel(dleft(c)) + ' · ' + rx.title;
+    $('#kSub').textContent = md(t) + '(' + wk(t) + ') 아침 공복 체중부터 적어 주세요';
+    box.replaceChildren(
+      el('div', { class: 'block' }, el('h3', {}, '기준 수치', el('span', { text: '하루 소비량 약 ' + rx.tdee + 'kcal 기준' })),
+        el('div', { class: 'stats' }, stat(rx.kcal, '하루 열량 (kcal)'), stat(rx.protein + 'g', '단백질'), stat(rx.carb + 'g', '탄수화물'), stat(rx.water.toFixed(1) + 'L', '물'))),
+      el('div', { class: 'block' }, el('h3', { text: '식단' }), el('div', { class: 'table-wrap' }, el('table', {},
+        el('thead', {}, el('tr', {}, el('th', { text: '언제' }), el('th', { text: '이렇게 드세요' }))),
+        el('tbody', {}, rx.meals.map(function (r) { return el('tr', {}, el('td', {}, el('b', { text: r[0] })), el('td', {}, r[1], el('small', { text: r[2] }))); }))))),
+      el('div', { class: 'block' }, el('h3', { text: '운동' }), rx.workout.map(function (r) { return el('div', { class: 'ex' }, el('b', { text: r[0] }), el('span', { class: 'sets', text: r[1] })); })),
+      el('div', { class: 'block' }, el('h3', { text: '오늘 꼭 지킬 것' }), el('ul', { class: 'tips' }, rx.rules.map(function (x) { return el('li', { text: x }); }))));
+  }
+  function chart(c, days, small) {
+    var sw = num(c.startWeight), gw = num(c.goalWeight);
+    var pts = Object.keys(days).sort().filter(function (d) { return num(days[d].weight) != null; }).map(function (d) { return { d: d, w: +days[d].weight }; });
+    if ((sw == null || gw == null || !c.startDate || !c.ddate) && !pts.length) return el('div', { class: 'empty', text: '목표를 정하고 공복 체중을 기록하면 그래프가 그려집니다.' });
+    var all = [c.startDate, c.ddate].concat(pts.map(function (p) { return p.d; })).filter(Boolean).sort();
+    var start = all[0], end = all[all.length - 1], span = Math.max(1, diff(start, end));
+    var ws = [sw, gw].concat(pts.map(function (p) { return p.w; })).filter(function (v) { return v != null; });
+    var lo = Math.floor(Math.min.apply(null, ws) - 0.5), hi = Math.ceil(Math.max.apply(null, ws) + 0.5);
+    if (hi - lo < 3) hi = lo + 3;
+    var W = 620, H = small ? 200 : 260, L = 42, R = 18, T = 18, B = 32;
+    function x(d) { return L + diff(start, d) / span * (W - L - R); }
+    function y(w) { return T + (hi - w) / (hi - lo) * (H - T - B); }
+    var NS = 'http://www.w3.org/2000/svg';
+    function s(tag, a, txt) { var e = document.createElementNS(NS, tag), k; for (k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; }
+    var svg = s('svg', { viewBox: '0 0 ' + W + ' ' + H, class: 'chart', role: 'img', 'aria-label': '체중 변화 그래프' });
+    var step = hi - lo > 8 ? 2 : 1, v, i;
+    for (v = lo; v <= hi; v += step) {
+      svg.append(s('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: 'var(--line)', 'stroke-width': 1 }));
+      svg.append(s('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end', 'font-size': 11, fill: 'var(--muted)', 'font-family': 'IBM Plex Mono, monospace' }, v));
+    }
+    var every = Math.max(1, Math.ceil(span / 7));
+    for (i = 0; i <= span; i++) {
+      var d = addDays(start, i), isD = d === c.ddate;
+      if (i % every && i !== span && !isD) continue;
+      svg.append(s('text', { x: x(d), y: H - 9, 'text-anchor': 'middle', 'font-size': 11, fill: isD ? 'var(--brass)' : 'var(--muted)', 'font-weight': isD ? 700 : 400, 'font-family': 'IBM Plex Mono, monospace' }, isD ? 'D-day' : md(d)));
+    }
+    if (sw != null && gw != null && c.startDate && c.ddate) {
+      svg.append(s('line', { x1: x(c.startDate), y1: y(sw), x2: x(c.ddate), y2: y(gw), stroke: 'var(--brass)', 'stroke-width': 2, 'stroke-dasharray': '6 5' }));
+      svg.append(s('circle', { cx: x(c.ddate), cy: y(gw), r: 6, fill: 'var(--panel)', stroke: 'var(--brass)', 'stroke-width': 2.5 }));
+    }
+    if (pts.length) {
+      if (pts.length > 1) svg.append(s('path', { d: pts.map(function (p, j) { return (j ? 'L' : 'M') + x(p.d).toFixed(1) + ' ' + y(p.w).toFixed(1); }).join(' '), fill: 'none', stroke: 'var(--text)', 'stroke-width': 2.5, 'stroke-linejoin': 'round' }));
+      pts.forEach(function (p, j) {
+        var last = j === pts.length - 1;
+        svg.append(s('circle', { cx: x(p.d), cy: y(p.w), r: last ? 5.5 : 3.5, fill: last ? 'var(--brass)' : 'var(--text)' }));
+        if (last || j === 0) svg.append(s('text', { x: x(p.d), y: y(p.w) - 11, 'text-anchor': 'middle', 'font-size': 13, fill: 'var(--text)', 'font-weight': 700, 'font-family': 'IBM Plex Mono, monospace' }, p.w.toFixed(1)));
+      });
+    }
+    return el('div', {}, svg, el('div', { class: 'legend' }, el('span', {}, el('i'), '실제 공복 체중'), el('span', {}, el('i', { class: 't' }), '목표선')));
+  }
+  function renderLog() {
+    var ds = Object.keys(S.days).sort().reverse(), box = $('#logBox');
+    if (!ds.length) { box.replaceChildren(el('div', { class: 'empty', text: '오늘 기록을 저장하면 날짜별로 쌓입니다.' })); return; }
+    box.replaceChildren(el('table', {}, el('thead', {}, el('tr', {}, ['날짜', '체중', '변화', '식단 · 운동'].map(function (h) { return el('th', { text: h }); }))),
+      el('tbody', {}, ds.map(function (d, i) {
+        var r = S.days[d], prev = ds.slice(i + 1).filter(function (p) { return num(S.days[p].weight) != null; })[0];
+        var ch = num(r.weight) != null && prev ? +r.weight - +S.days[prev].weight : null;
+        return el('tr', {}, el('td', { class: 'num', text: md(d) + '(' + wk(d) + ')' }), el('td', { class: 'num', text: f1(num(r.weight)) }),
+          el('td', { class: 'num ' + (ch == null ? '' : ch <= 0 ? 'down' : 'up'), text: ch == null ? '' : (ch > 0 ? '+' : '') + ch.toFixed(1) }),
+          el('td', {}, (r.meals || '').split('\n').filter(Boolean).slice(0, 3).join(' / '), r.workout ? el('small', { text: r.workout }) : null));
+      }))));
+  }
+  function renderShowcase() {
+    var J = S.journey, box = $('#showcase');
+    if (!J || !J.cfg || J.cfg.startWeight == null) { box.hidden = true; return; }
+    var c = J.cfg, days = J.days || {}, cur = lastWeight(days, c), sw = num(c.startWeight);
+    var ds = Object.keys(days).sort(), last = null, i;
+    for (i = ds.length - 1; i >= 0; i--) if (days[ds[i]].verdict) { last = days[ds[i]]; break; }
+    $('#scTitle').textContent = (c.name || '박찬웅') + ' 코치의 ' + (c.event || '다이어트') + ' 도전기';
+    $('#scSub').textContent = '이 처방대로 직접 하는 중 · ' + (c.startDate ? md(c.startDate) + ' 시작' : '') + (c.ddate ? ' → ' + md(c.ddate) + '(' + wk(c.ddate) + ')' : '');
+    $('#scBadge').textContent = dlabel(dleft(c));
+    var lost = sw != null && cur.w != null ? sw - cur.w : null;
+    $('#scMini').replaceChildren(
+      el('div', {}, el('b', { text: f1(sw) }), el('span', { text: '시작 kg' })),
+      el('div', {}, el('b', { text: f1(cur.w) }), el('span', { text: cur.d ? '현재 kg · ' + md(cur.d) : '현재 kg' })),
+      el('div', {}, el('b', { text: lost == null ? '--' : (lost >= 0 ? '-' : '+') + Math.abs(lost).toFixed(1) }), el('span', { text: '변화 kg' })),
+      el('div', {}, el('b', { text: f1(c.goalWeight) }), el('span', { text: '목표 kg' })));
+    $('#scChart').replaceChildren(chart(c, days, true));
+    if (last) { $('#scVerdict').hidden = false; $('#scVerdict').replaceChildren(el('span', { class: 'ai-tag', text: 'AI 평가' + (last.score != null ? ' ' + last.score + '점' : '') }), ' ', last.verdict); }
+    else $('#scVerdict').hidden = true;
+    box.hidden = false;
+  }
+  function renderAll() { renderBoard(); renderToday(); renderShowcase(); $('#chartBox').replaceChildren(chart(cfg(), S.days, false)); renderLog(); }
+
+  // ---------- AI 코칭 질문 만들기 ----------
+  function coachPrompt() {
+    var c = cfg(), t = today(), d = S.days[t] || {}, rx = prescribe(c, S.days), cur = lastWeight(S.days, c);
+    var recent = Object.keys(S.days).sort().slice(-7).map(function (k) {
+      var r = S.days[k];
+      return '- ' + k + '(' + wk(k) + '): 체중 ' + (r.weight != null ? r.weight : '?') + 'kg / 물 ' + (r.water != null ? r.water : '?') + 'L / 걸음 ' + (r.steps != null ? r.steps : '?') + ' / 수면 ' + (r.sleep != null ? r.sleep : '?') + 'h\n  식단: ' + (r.meals || '기록 없음').replace(/\n/g, ' / ') + '\n  운동: ' + (r.workout || '-') + ' / 메모: ' + (r.note || '-');
+    }).join('\n') || '아직 기록 없음';
+    var extra = $('#aiAsk').value.trim();
+    return '너는 18년차 트레이너가 만든 다이어트 코치야. 아래 내 정보와 기록을 보고 오늘 하루를 평가해 줘.\n'
+      + '안전 원칙: 이뇨제·변비약·사우나 탈수·단식은 권하지 말 것. 하루 ' + (c.sex === 'm' ? '1,500' : '1,200') + 'kcal 아래로 내리지 말 것. 며칠 사이 빠지는 무게는 대부분 수분이라는 점을 솔직하게 말할 것.\n\n'
+      + '[나] ' + (c.sex === 'm' ? '남성' : '여성') + ', ' + c.age + '세, ' + c.height + 'cm, 주 ' + (c.days || 3) + '회 운동\n'
+      + '[목표] ' + (c.event || '다이어트') + ' ' + (c.ddate || '') + ' (' + dlabel(dleft(c)) + '), ' + c.startWeight + 'kg → ' + c.goalWeight + 'kg, 현재 ' + (cur.w != null ? cur.w : '?') + 'kg\n'
+      + '[오늘 처방] ' + rx.title + ' · ' + rx.kcal + 'kcal · 단백질 ' + rx.protein + 'g · 탄수화물 ' + rx.carb + 'g · 물 ' + rx.water.toFixed(1) + 'L\n'
+      + '[최근 기록]\n' + recent + '\n\n'
+      + '이렇게 답해 줘:\n1) 오늘 점수 (100점 만점)와 한 줄 총평\n2) 잘한 점 2개\n3) 고칠 점 2개 (구체적으로)\n4) 내일 딱 한 가지'
+      + (extra ? '\n5) 추가 질문: ' + extra : '');
+  }
+
+  // ---------- 이벤트 ----------
+  $('#cf').addEventListener('submit', function (ev) {
+    ev.preventDefault(); show('#cErr');
+    var c = { sex: $('#cSex').value, age: num($('#cAge').value), height: num($('#cHeight').value), startWeight: num($('#cStart').value), goalWeight: num($('#cGoal').value),
+      days: +$('#cDays').value, startDate: $('#cStartDate').value || today(), ddate: $('#cDate').value || null, event: $('#cEvent').value.trim() || '다이어트' };
+    if (!c.age || !c.height || !c.startWeight || !c.goalWeight) { show('#cErr', '나이·키·시작 체중·목표 체중을 모두 적어 주세요.'); return; }
+    if (!c.ddate) { show('#cErr', 'D-day 날짜를 정해 주세요.'); $('#cDate').focus(); return; }
+    if (c.ddate < c.startDate) { show('#cErr', 'D-day는 시작일보다 뒤여야 해요.'); return; }
+    if (c.goalWeight >= c.startWeight) { show('#cErr', '목표 체중이 시작 체중보다 낮아야 감량 처방을 할 수 있어요.'); return; }
+    S.cfg = c;
+    if (!save()) show('#cErr', '이 브라우저가 저장을 막고 있어요. 지금 화면에서는 보이지만 다시 열면 사라집니다.');
+    fillForm(); renderAll();
+    $('#board').scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'start' });
+  });
+  $('#kf').addEventListener('submit', function (ev) {
+    ev.preventDefault(); show('#kErr'); $('#kMsg').textContent = '';
+    if (!S.cfg) { show('#kErr', '먼저 목표 문진표를 내 정보로 바꾸고 코칭 시작을 눌러 주세요.'); $('#cSex').focus(); return; }
+    var t = today();
+    S.days[t] = { date: t, weight: num($('#kWeight').value), water: num($('#kWater').value), steps: num($('#kSteps').value), sleep: num($('#kSleep').value),
+      meals: $('#kMeals').value.trim(), workout: $('#kWorkout').value.trim(), note: $('#kNote').value.trim() };
+    $('#kMsg').textContent = save() ? '저장했어요' : '';
+    if (!$('#kMsg').textContent) show('#kErr', '이 브라우저가 저장을 막고 있어요. 시크릿 창이 아닌 일반 창에서 열어 주세요.');
+    renderAll();
+  });
+  $('#aiCopy').addEventListener('click', function () {
+    if (!S.cfg) { $('#aiMsg').textContent = '먼저 목표 문진표를 채워 주세요.'; return; }
+    var text = coachPrompt(), box = $('#aiBox');
+    box.value = text; box.hidden = false;
+    var done = function () { $('#aiMsg').textContent = '복사했어요. AI 앱에 붙여 넣으세요.'; };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { box.select(); $('#aiMsg').textContent = '아래 글을 길게 눌러 복사해 주세요.'; });
+    else { box.select(); $('#aiMsg').textContent = '아래 글을 길게 눌러 복사해 주세요.'; }
+  });
+
+  // ---------- 시작 ----------
+  load(); fillForm(); fillCheck(); renderAll();
+  fetch('journey.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) { S.journey = j; renderShowcase(); }).catch(function () {});
 })();
 </script>
