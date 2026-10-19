@@ -1544,7 +1544,10 @@
       ex: x.rx.workout.map(function (w) { return [w[0], w[1], '']; }), warn: '' }];
     return { x: x, picks: picks };
   }
-  function renderAnswer(q, res) {
+  // 진짜 AI 코치 서버 (Cloudflare Worker). 비어 있으면 위의 코칭 방식 처방만 보여 준다.
+  var COACH_API = '';
+  var aiImage = null, aiBusy = false;
+  function renderAnswer(q, res, label) {
     var x = res.x, c = x.c;
     var who = x.ex ? '목표 문진표를 채우면 내 몸에 맞춰 더 정확하게 처방합니다.'
       : (c.event || '목표') + ' ' + dlabel(x.n) + ' · 현재 ' + f1(x.w) + 'kg → 목표 ' + f1(c.goalWeight) + 'kg · 오늘 ' + x.rx.kcal + 'kcal · 단백질 ' + x.protein + 'g' + (x.ib ? ' · 인바디 반영' : '');
@@ -1552,7 +1555,7 @@
       el('p', { class: 'q' }, el('span', { class: 'ai-tag', text: '질문' }), ' ', q),
       el('p', { class: 'hint', style: 'margin:0', text: who }),
       res.picks.map(function (p) {
-        return el('div', { class: 'block' }, el('h3', {}, p.title, el('span', { text: '코치 처방' })),
+        return el('div', { class: 'block' }, el('h3', {}, p.title, el('span', { text: label || '코치 처방' })),
           el('ul', { class: 'tips' }, p.say.filter(Boolean).map(function (s) { return el('li', { text: s }); })),
           p.ex.length ? el('div', { class: 'ex-list' }, p.ex.map(function (r) {
             return el('div', { class: 'ex-item' }, el('div', { class: 'ex-top' }, el('b', { text: r[0] }), el('span', { class: 'sets', text: r[1] })), r[2] ? el('small', { text: r[2] }) : null);
@@ -1563,16 +1566,74 @@
     box.prepend(card);
     while (box.children.length > 3) box.lastElementChild.remove();
     card.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'start' });
+    return card;
   }
-  $('#askForm').addEventListener('submit', function (ev) {
-    ev.preventDefault();
-    var q = $('#askIn').value.trim();
-    if (!q) { $('#askIn').focus(); return; }
-    renderAnswer(q, consult(q));
-  });
+  // AI에게 보낼 내 정보 요약 (목표 · 오늘 처방 · 최근 7일 · 인바디)
+  function aiContext() {
+    var x = coachCtx(), c = x.c;
+    var lines = [];
+    if (x.ex) lines.push('목표 문진표를 아직 안 채움');
+    else {
+      lines.push((c.sex === 'm' ? '남성' : '여성') + ', ' + c.age + '세, ' + c.height + 'cm, 주 ' + (c.days || 3) + '회 운동');
+      lines.push('목표: ' + (c.event || '다이어트') + ' ' + (c.ddate || '') + ' (' + dlabel(x.n) + '), ' + c.startWeight + 'kg → ' + c.goalWeight + 'kg, 현재 ' + f1(x.w) + 'kg');
+      lines.push('오늘 공식 처방: ' + x.rx.title + ', ' + x.rx.kcal + 'kcal, 단백질 ' + x.protein + 'g, 탄수화물 ' + x.rx.carb + 'g, 물 ' + x.rx.water.toFixed(1) + 'L');
+    }
+    Object.keys(S.days).sort().slice(-7).forEach(function (k) {
+      var r = S.days[k];
+      lines.push('- ' + k + ': 체중 ' + (r.weight != null ? r.weight : '?') + 'kg, 식단 ' + (r.meals || '-').replace(/\n/g, ' / ') + ', 운동 ' + (r.workout || '-') + ', 메모 ' + (r.note || '-')
+        + (r.inbody ? ', 인바디 골격근 ' + r.inbody.smm + 'kg 체지방 ' + r.inbody.bfm + 'kg 체지방률 ' + r.inbody.pbf + '%' : ''));
+    });
+    return lines.join('\n');
+  }
+  function toJpegB64(file) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var scale = Math.min(1, 1568 / Math.max(img.width, img.height)), cv = document.createElement('canvas');
+        cv.width = Math.round(img.width * scale); cv.height = Math.round(img.height * scale);
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); URL.revokeObjectURL(url);
+        resolve(cv.toDataURL('image/jpeg', 0.85).split(',')[1]);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('image')); };
+      img.src = url;
+    });
+  }
+  function ask(q) {
+    q = (q || '').trim();
+    if (!q && !aiImage) { $('#askIn').focus(); return; }
+    if (!COACH_API) { renderAnswer(q || '인바디 분석', consult(q || '인바디')); return; }
+    if (aiBusy) return;
+    aiBusy = true; var btn = $('#askBtn'); btn.disabled = true; btn.textContent = 'AI 코치가 답하는 중…';
+    var x = coachCtx();
+    var wait = renderAnswer(q || '첨부한 인바디 결과지를 분석해 주세요', { x: x, picks: [{ title: 'AI 코치가 내 기록을 보고 있어요', say: ['보통 10 — 30초 걸립니다.'], ex: [], warn: '' }] }, 'AI 코치');
+    var img = aiImage;
+    (img ? toJpegB64(img) : Promise.resolve(null)).then(function (b64) {
+      return fetch(COACH_API, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q, context: aiContext(), image: b64 ? { media_type: 'image/jpeg', data: b64 } : null }) });
+    }).then(function (r) { return r.json().catch(function () { return {}; }); }).then(function (d) {
+      wait.remove();
+      if (d && d.answer) {
+        var a = d.answer;
+        renderAnswer(q || '첨부한 인바디 결과지 분석', { x: x, picks: [{ title: a.title || 'AI 코치 처방', say: [a.diagnosis].concat(a.say || []),
+          ex: (a.ex || []).map(function (e) { return [e.name, e.dose, e.point]; }), warn: a.warn || '' }] }, 'AI 코치 답변');
+        if (img) { aiImage = null; ibSay('AI 코치가 사진을 보고 답했어요. 다른 사진을 넣으려면 인바디 사진 첨부를 다시 누르세요.', 'on'); }
+      } else {
+        var card = renderAnswer(q || '인바디 분석', consult(q || '인바디'));
+        card.insertBefore(el('p', { class: 'note warn', text: ((d && d.message) || 'AI 코치 연결이 잠깐 끊겼어요.') + ' 대신 코칭 방식 처방을 보여 드려요.' }), card.children[1]);
+      }
+    }).catch(function () {
+      wait.remove();
+      var card = renderAnswer(q || '인바디 분석', consult(q || '인바디'));
+      card.insertBefore(el('p', { class: 'note warn', text: '인터넷 연결을 확인해 주세요. 대신 코칭 방식 처방을 보여 드려요.' }), card.children[1]);
+    }).then(function () { aiBusy = false; btn.disabled = false; btn.textContent = '코치에게 질문하기'; });
+  }
+  $('#askForm').addEventListener('submit', function (ev) { ev.preventDefault(); ask($('#askIn').value); });
   $('#askChips').addEventListener('click', function (ev) {
     if (!ev.target.matches('.chip')) return;
-    $('#askIn').value = ev.target.textContent; renderAnswer(ev.target.textContent, consult(ev.target.textContent));
+    $('#askIn').value = ev.target.textContent; ask(ev.target.textContent);
+  });
+  $('#ibFile').addEventListener('change', function () {
+    aiImage = ($('#ibFile').files && $('#ibFile').files[0]) || null;
   });
 
   // ---------- 이벤트 ----------
