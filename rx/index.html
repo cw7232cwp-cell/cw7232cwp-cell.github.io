@@ -1548,7 +1548,7 @@
   // 진짜 AI 코치 서버 (Cloudflare Worker). 비어 있으면 위의 코칭 방식 처방만 보여 준다.
   var COACH_API = '';
   var aiImage = null, aiBusy = false;
-  function renderAnswer(q, res, label) {
+  function renderAnswer(q, res, label, quiet) {
     var x = res.x, c = x.c;
     var who = x.ex ? '목표 문진표를 채우면 내 몸에 맞춰 더 정확하게 처방합니다.'
       : (c.event || '목표') + ' ' + dlabel(x.n) + ' · 현재 ' + f1(x.w) + 'kg → 목표 ' + f1(c.goalWeight) + 'kg · 오늘 ' + x.rx.kcal + 'kcal · 단백질 ' + x.protein + 'g' + (x.ib ? ' · 인바디 반영' : '');
@@ -1565,8 +1565,8 @@
       }));
     var box = $('#answers');
     box.prepend(card);
-    while (box.children.length > 3) box.lastElementChild.remove();
-    card.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'start' });
+    while (box.children.length > 5) box.lastElementChild.remove();
+    if (!quiet) card.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'start' });
     return card;
   }
   // AI에게 보낼 내 정보 요약 (목표 · 오늘 처방 · 최근 7일 · 인바디)
@@ -1599,10 +1599,17 @@
       img.src = url;
     });
   }
+  var QA_KEY = 'bono-dday-qa-v1';
+  function loadQA() { try { return JSON.parse(localStorage.getItem(QA_KEY) || '[]') || []; } catch (e) { return []; } }
+  function saveQA(q, picks, label) {
+    var list = loadQA(); list.push({ t: new Date().toISOString(), q: q, picks: picks, label: label || '' });
+    try { localStorage.setItem(QA_KEY, JSON.stringify(list.slice(-20))); } catch (e) {}
+  }
+  function answerAndSave(q, res, label) { saveQA(q, res.picks, label); return renderAnswer(q, res, label); }
   function ask(q) {
     q = (q || '').trim();
     if (!q && !aiImage) { $('#askIn').focus(); return; }
-    if (!COACH_API) { renderAnswer(q || '인바디 분석', consult(q || '인바디')); return; }
+    if (!COACH_API) { answerAndSave(q || '인바디 분석', consult(q || '인바디')); return; }
     if (aiBusy) return;
     aiBusy = true; var btn = $('#askBtn'); btn.disabled = true; btn.textContent = 'AI 코치가 답하는 중…';
     var x = coachCtx();
@@ -1615,7 +1622,7 @@
       wait.remove();
       if (d && d.answer) {
         var a = d.answer;
-        renderAnswer(q || '첨부한 인바디 결과지 분석', { x: x, picks: [{ title: a.title || 'AI 코치 처방', say: [a.diagnosis].concat(a.say || []),
+        answerAndSave(q || '첨부한 인바디 결과지 분석', { x: x, picks: [{ title: a.title || 'AI 코치 처방', say: [a.diagnosis].concat(a.say || []),
           ex: (a.ex || []).map(function (e) { return [e.name, e.dose, e.point]; }), warn: a.warn || '' }] }, 'AI 코치 답변');
         if (img) { aiImage = null; ibSay('AI 코치가 사진을 보고 답했어요. 다른 사진을 넣으려면 인바디 사진 첨부를 다시 누르세요.', 'on'); }
       } else {
@@ -1638,6 +1645,11 @@
   });
 
   // ---------- 이벤트 ----------
+  var DRAFT_KEY = 'bono-dday-draft-v1';
+  $('#cf').addEventListener('input', function () {
+    var d = {}; ['cSex', 'cAge', 'cHeight', 'cStart', 'cGoal', 'cDays', 'cStartDate', 'cDate', 'cEvent'].forEach(function (id) { d[id] = $('#' + id).value; });
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); } catch (e) {}
+  });
   $('#cf').addEventListener('submit', function (ev) {
     ev.preventDefault(); show('#cErr');
     var c = { sex: $('#cSex').value, age: num($('#cAge').value), height: num($('#cHeight').value), startWeight: num($('#cStart').value), goalWeight: num($('#cGoal').value),
@@ -1672,6 +1684,8 @@
 
   // ---------- 시작 ----------
   load(); fillForm(); fillCheck(); renderAll();
+  if (!S.cfg) { try { var dr = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); if (dr) Object.keys(dr).forEach(function (id) { if (dr[id] !== '' && $('#' + id)) $('#' + id).value = dr[id]; }); } catch (e) {} }
+  loadQA().slice(-5).forEach(function (h) { var card = renderAnswer(h.q, { x: coachCtx(), picks: h.picks || [] }, h.label, true); card.querySelector('.hint').textContent = new Date(h.t).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' 상담 기록'; });
   (function () { var ib = (S.days[today()] || {}).inbody; if (!ib) return; $('#ibW').value = ib.weight; $('#ibSmm').value = ib.smm; $('#ibBfm').value = ib.bfm; $('#ibPbf').value = ib.pbf; $('#ibBmr').value = ib.bmr; runInbody(); })();
   fetch('journey.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; })
     .then(function (j) { S.journey = j; renderShowcase(); }).catch(function () {});
