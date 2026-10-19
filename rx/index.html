@@ -199,6 +199,7 @@
   .ai-tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; color: var(--bg); background: var(--brass); padding: 2px 7px; border-radius: 2px; vertical-align: middle; }
   .ai-steps { margin: 0; padding-left: 20px; color: var(--muted); display: grid; gap: 6px; font-size: 15px; }
   .ai-steps b { color: var(--text); font-weight: 500; }
+  .ib-prev:not([hidden]) { display: block; max-width: 100%; max-height: 280px; margin-top: 12px; border: 1px solid var(--line); border-radius: 3px; }
   .copy-box { width: 100%; min-height: 120px; font-family: var(--mono); font-size: 12.5px; color: var(--text); background: var(--surface); border: 1px solid var(--line-strong); border-radius: 3px; padding: 10px; }
   @media print {
     form, footer, .cta .btns { display: none; }
@@ -314,10 +315,28 @@
             <div><p class="eyebrow">AI COACH</p><h2>AI 코치에게 오늘 기록 검사받기</h2><div class="sub">내 목표·오늘 처방·기록을 담은 코칭 질문을 만들어 드립니다</div></div>
           </div>
           <div class="rx-body">
+            <div class="block" id="ibBlock">
+              <h3>인바디 사진 분석 <span>사진은 이 기기 안에서만 읽어요</span></h3>
+              <label class="file-btn" for="ibFile">인바디 결과지 사진 넣기</label>
+              <input id="ibFile" type="file" accept="image/*" hidden>
+              <img id="ibPrev" class="ib-prev" alt="올린 인바디 결과지" hidden>
+              <p class="ocr-status" id="ibStatus" style="margin:10px 0">사진을 넣으면 숫자를 자동으로 읽어요. 결과지와 다른 숫자는 직접 고쳐 주세요.</p>
+              <div class="row4">
+                <div class="field"><label for="ibW">체중 kg</label><input id="ibW" type="number" step="0.1" inputmode="decimal" placeholder="92.4"></div>
+                <div class="field"><label for="ibSmm">골격근량 kg</label><input id="ibSmm" type="number" step="0.1" inputmode="decimal" placeholder="46.0"></div>
+                <div class="field"><label for="ibBfm">체지방량 kg</label><input id="ibBfm" type="number" step="0.1" inputmode="decimal" placeholder="13.1"></div>
+                <div class="field"><label for="ibPbf">체지방률 %</label><input id="ibPbf" type="number" step="0.1" inputmode="decimal" placeholder="14.2"></div>
+              </div>
+              <div class="row2">
+                <div class="field"><label for="ibBmr">기초대사량 kcal</label><input id="ibBmr" type="number" step="1" inputmode="numeric" placeholder="2100"></div>
+                <div class="field" style="align-self:end"><button class="btn" type="button" id="ibGo">인바디 분석 보기</button></div>
+              </div>
+              <div id="ibOut"></div>
+            </div>
             <ol class="ai-steps">
               <li><b>오늘 기록</b>을 저장합니다.</li>
               <li>아래 <b>코칭 질문 복사</b>를 누릅니다.</li>
-              <li>ChatGPT나 Claude 앱에 붙여 넣으면 <b>점수 · 잘한 점 · 고칠 점 · 내일 할 일</b>을 받아 볼 수 있습니다.</li>
+              <li>ChatGPT나 Claude 앱에 붙여 넣으면 (인바디 사진도 같이 올리면 더 자세히 봐 줍니다) <b>점수 · 잘한 점 · 고칠 점 · 내일 할 일</b>을 받아 볼 수 있습니다.</li>
             </ol>
             <div class="field" style="margin:0">
               <label for="aiAsk">더 묻고 싶은 것 (선택)</label>
@@ -1231,15 +1250,149 @@
       return '- ' + k + '(' + wk(k) + '): 체중 ' + (r.weight != null ? r.weight : '?') + 'kg / 물 ' + (r.water != null ? r.water : '?') + 'L / 걸음 ' + (r.steps != null ? r.steps : '?') + ' / 수면 ' + (r.sleep != null ? r.sleep : '?') + 'h\n  식단: ' + (r.meals || '기록 없음').replace(/\n/g, ' / ') + '\n  운동: ' + (r.workout || '-') + ' / 메모: ' + (r.note || '-');
     }).join('\n') || '아직 기록 없음';
     var extra = $('#aiAsk').value.trim();
+    var ibLines = Object.keys(S.days).sort().filter(function (k) { return S.days[k].inbody; }).map(function (k) { var b = S.days[k].inbody; return '- ' + k + ': 체중 ' + b.weight + 'kg / 골격근량 ' + b.smm + 'kg / 체지방량 ' + b.bfm + 'kg / 체지방률 ' + b.pbf + '% / 기초대사량 ' + b.bmr + 'kcal'; }).join('\n');
     return '너는 18년차 트레이너가 만든 다이어트 코치야. 아래 내 정보와 기록을 보고 오늘 하루를 평가해 줘.\n'
       + '안전 원칙: 이뇨제·변비약·사우나 탈수·단식은 권하지 말 것. 하루 ' + (c.sex === 'm' ? '1,500' : '1,200') + 'kcal 아래로 내리지 말 것. 며칠 사이 빠지는 무게는 대부분 수분이라는 점을 솔직하게 말할 것.\n\n'
       + '[나] ' + (c.sex === 'm' ? '남성' : '여성') + ', ' + c.age + '세, ' + c.height + 'cm, 주 ' + (c.days || 3) + '회 운동\n'
       + '[목표] ' + (c.event || '다이어트') + ' ' + (c.ddate || '') + ' (' + dlabel(dleft(c)) + '), ' + c.startWeight + 'kg → ' + c.goalWeight + 'kg, 현재 ' + (cur.w != null ? cur.w : '?') + 'kg\n'
       + '[오늘 처방] ' + rx.title + ' · ' + rx.kcal + 'kcal · 단백질 ' + rx.protein + 'g · 탄수화물 ' + rx.carb + 'g · 물 ' + rx.water.toFixed(1) + 'L\n'
-      + '[최근 기록]\n' + recent + '\n\n'
+      + '[최근 기록]\n' + recent + '\n'
+      + (ibLines ? '[인바디 기록]\n' + ibLines + '\n' : '') + '\n'
       + '이렇게 답해 줘:\n1) 오늘 점수 (100점 만점)와 한 줄 총평\n2) 잘한 점 2개\n3) 고칠 점 2개 (구체적으로)\n4) 내일 딱 한 가지'
-      + (extra ? '\n5) 추가 질문: ' + extra : '');
+      + (ibLines ? '\n5) 인바디 분석: 체형 판정, 근육·체지방 변화의 의미, D-day까지 근육을 지키면서 뺄 방법' : '')
+      + (extra ? '\n' + (ibLines ? '6' : '5') + ') 추가 질문: ' + extra : '');
   }
+
+  // ---------- 인바디 사진 분석 ----------
+  var OCR_SRC = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+  function ibSay(msg, kind) { var e = $('#ibStatus'); e.textContent = msg; e.className = 'ocr-status' + (kind ? ' ' + kind : ''); }
+  function loadOcr() {
+    return new Promise(function (resolve, reject) {
+      if (window.Tesseract) return resolve(window.Tesseract);
+      var s = document.createElement('script'); s.src = OCR_SRC;
+      s.onload = function () { window.Tesseract ? resolve(window.Tesseract) : reject(new Error('no-tesseract')); };
+      s.onerror = function () { reject(new Error('script')); };
+      document.head.appendChild(s);
+    });
+  }
+  function shrink(file) {
+    return new Promise(function (resolve) {
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var scale = Math.min(1, 1600 / img.width), c = document.createElement('canvas');
+        c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+        var ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, c.width, c.height);
+        var d = ctx.getImageData(0, 0, c.width, c.height), p = d.data, i, g;
+        for (i = 0; i < p.length; i += 4) { g = p[i] * 0.299 + p[i + 1] * 0.587 + p[i + 2] * 0.114; g = g < 140 ? Math.max(0, g - 40) : Math.min(255, g + 40); p[i] = p[i + 1] = p[i + 2] = g; }
+        ctx.putImageData(d, 0, 0); URL.revokeObjectURL(url);
+        c.toBlob(function (b) { resolve(b || file); }, 'image/png');
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  }
+  function grab(text, labels, min, max) {
+    var t = text.replace(/\s+/g, ' '), i, m;
+    for (i = 0; i < labels.length; i++) {
+      m = t.match(new RegExp(labels[i] + '[^0-9]{0,12}(\\d{1,4}(?:[.,]\\d)?)'));
+      if (m) { var v = parseFloat(m[1].replace(',', '.')); if (v >= min && v <= max) return v; }
+    }
+    return 0;
+  }
+  // 4주 처방전과 같은 표준값 기준(참고용)
+  function ibAnalyze(v) {
+    var pbf = v.pbf, bfm = v.bfm;
+    if (!v.weight || (!pbf && !bfm)) return null;
+    if (!bfm) bfm = v.weight * pbf / 100;
+    if (!pbf) pbf = bfm / v.weight * 100;
+    var ffm = Math.max(10, v.weight - bfm), smm = v.smm || ffm * 0.5;
+    var stdW = (v.sex === 'm' ? 22 : 21) * Math.pow(v.height / 100, 2), stdFat = stdW * (v.sex === 'm' ? 15 : 23) / 100, stdSmm = (stdW - stdFat) * 0.5;
+    var fr = bfm / stdFat, mr = smm / stdSmm, type, text;
+    if (mr >= 1.02 && fr <= 1.05) { type = '근육형'; text = '근육량이 표준보다 넉넉하고 체지방은 잘 관리되고 있습니다.'; }
+    else if (mr >= 1.1 && fr < 1.2) { type = '근육형'; text = '근육량이 표준보다 많은 근육형입니다. 체지방만 조금 더 걷어내면 몸이 선명해집니다.'; }
+    else if (fr >= 1.2 && mr < 1.02) { type = '체지방 많은 형'; text = '근육량보다 체지방이 많은 편입니다. 근력운동으로 근육을 지키면서 체지방을 줄이는 것이 우선입니다.'; }
+    else if (mr < 0.9 && fr < 1.1) { type = '근육 부족형'; text = '체지방은 많지 않지만 근육량이 적은 편입니다. 잘 먹으면서 근력운동을 늘리는 것이 먼저입니다.'; }
+    else { type = '표준형'; text = '근육량과 체지방이 표준 범위 안에 있습니다.'; }
+    var hi = v.sex === 'm' ? 20 : 28, lo = v.sex === 'm' ? 10 : 18;
+    return { weight: v.weight, pbf: Math.round(pbf * 10) / 10, bfm: Math.round(bfm * 10) / 10, smm: Math.round(smm * 10) / 10, ffm: Math.round(ffm * 10) / 10,
+      smmGiven: !!v.smm, bmr: v.bmr || Math.round(370 + 21.6 * ffm), bmrGiven: !!v.bmr, type: type, text: text,
+      pbfState: pbf > hi ? '높음' : pbf < lo ? '낮음' : '표준', std: { w: stdW, fat: stdFat, smm: stdSmm } };
+  }
+  function prevInbody(before) {
+    var ds = Object.keys(S.days).sort().filter(function (d) { return d < before && S.days[d].inbody; });
+    return ds.length ? { d: ds[ds.length - 1], ib: S.days[ds[ds.length - 1]].inbody } : null;
+  }
+  function renderInbody(a, date) {
+    var c = cfg(), out = $('#ibOut');
+    if (!a) { out.replaceChildren(); return; }
+    var maxKg = Math.max(a.weight, a.std.w) * 1.05;
+    function row(label, val, std, unit) {
+      var pct = Math.max(4, Math.min(100, val / maxKg * 100)), s1 = Math.min(100, std * 0.9 / maxKg * 100), s2 = Math.min(100, std * 1.1 / maxKg * 100);
+      return el('div', { class: 'bar-row' }, el('span', { text: label }),
+        el('span', { class: 'bar-track' }, el('span', { class: 'bar-fill', style: 'width:' + pct.toFixed(1) + '%' }), el('span', { class: 'bar-std', style: 'left:' + s1.toFixed(1) + '%;width:' + Math.max(2, s2 - s1).toFixed(1) + '%' })),
+        el('span', { class: 'num', text: val + unit }));
+    }
+    var tips = [
+      el('li', {}, el('b', { text: '제지방량 ' + a.ffm + 'kg · ' }), '근육·뼈·수분처럼 지방이 아닌 무게입니다. 단백질은 하루 ' + Math.round(a.ffm * 2.2) + 'g(제지방 1kg당 2.2g)을 기준으로 잡으세요.'),
+      el('li', {}, el('b', { text: '기초대사량 ' + a.bmr + 'kcal' + (a.bmrGiven ? '' : '(추정)') + ' · ' }), '감량 중에도 이 아래로는 먹지 마세요. 근육이 먼저 빠집니다.')
+    ];
+    var gw = num(c.goalWeight), n = dleft(c);
+    if (!c.example && gw != null && a.weight > gw) {
+      var need = a.weight - gw, fatOk = n != null && n > 0 ? Math.min(a.bfm, a.weight * 0.01 * (n / 7)) : null;
+      tips.push(el('li', {}, el('b', { text: '목표까지 ' + need.toFixed(1) + 'kg · ' }),
+        fatOk != null ? '남은 ' + n + '일 동안 체지방으로 건강하게 뺄 수 있는 양은 약 ' + fatOk.toFixed(1) + 'kg입니다. 나머지는 수분·붓기 관리로 채워야 해서, 근육이 빠지지 않게 단백질과 근력 운동을 지켜야 합니다.' : '목표 체중보다 ' + need.toFixed(1) + 'kg 무겁습니다.'));
+    }
+    var pv = prevInbody(date || today()), cmp = null;
+    if (pv) {
+      var dW = a.weight - pv.ib.weight, dM = a.smm - pv.ib.smm, dF = a.bfm - pv.ib.bfm;
+      var sg = function (x) { return (x > 0 ? '+' : '') + x.toFixed(1); };
+      cmp = el('div', { class: 'stats', style: 'margin-top:14px' },
+        stat(sg(dW) + 'kg', '체중 변화 · ' + md(pv.d) + '부터'), stat(sg(dM) + 'kg', '골격근량 변화'), stat(sg(dF) + 'kg', '체지방량 변화'));
+    }
+    out.replaceChildren(el('div', { style: 'margin-top:18px' },
+      el('div', { class: 'body-type' }, el('span', { text: a.type }), el('span', { text: '체지방률 ' + a.pbf + '% · ' + a.pbfState }), el('span', { text: a.smmGiven ? '골격근량 측정값' : '골격근량 추정값' })),
+      el('p', { style: 'margin:0;color:var(--muted)', text: a.text }),
+      el('div', { class: 'bar' }, row('체중', a.weight, a.std.w, 'kg'), row('골격근량', a.smm, a.std.smm, 'kg'), row('체지방량', a.bfm, a.std.fat, 'kg')),
+      el('p', { class: 'hint', text: '점선 구간이 키에 맞는 표준 범위입니다. 인바디 결과지의 표준 범위와는 조금 다를 수 있습니다.' }),
+      cmp,
+      el('ul', { class: 'tips', style: 'margin-top:14px' }, tips)));
+  }
+  $('#ibFile').addEventListener('change', function () {
+    var file = $('#ibFile').files && $('#ibFile').files[0];
+    if (!file) return;
+    var prev = $('#ibPrev'); if (prev.src) URL.revokeObjectURL(prev.src);
+    prev.src = URL.createObjectURL(file); prev.hidden = false;
+    ibSay('사진을 읽는 중입니다. 10초에서 30초쯤 걸립니다.', 'on');
+    shrink(file).then(function (blob) {
+      return loadOcr().then(function (T) {
+        return T.recognize(blob, 'kor+eng', { logger: function (m) { if (m.status === 'recognizing text' && m.progress) ibSay('사진을 읽는 중입니다. ' + Math.round(m.progress * 100) + '%', 'on'); } });
+      });
+    }).then(function (res) {
+      var t = (res && res.data && res.data.text) || '', got = [];
+      [['#ibW', ['체중', '몸무게', 'Weight'], 30, 200, '체중'], ['#ibSmm', ['골격근량', '골격근', 'SMM'], 10, 70, '골격근량'], ['#ibBfm', ['체지방량', 'BFM'], 2, 90, '체지방량'],
+       ['#ibPbf', ['체지방률', '체지방율', 'PBF'], 3, 65, '체지방률'], ['#ibBmr', ['기초대사량', 'BMR'], 700, 3500, '기초대사량']].forEach(function (f) {
+        var v = grab(t, f[1], f[2], f[3]); if (v) { $(f[0]).value = v; got.push(f[4]); }
+      });
+      if (got.length) { ibSay('읽은 항목: ' + got.join(', ') + '. 결과지와 다르면 고친 뒤 인바디 분석 보기를 누르세요.', 'on'); runInbody(); }
+      else ibSay('사진에서 숫자를 찾지 못했습니다. 위 칸에 직접 입력하고 인바디 분석 보기를 눌러 주세요. 밝은 곳에서 결과지를 똑바로 찍으면 더 잘 읽습니다.', 'err');
+    }).catch(function () { ibSay('사진을 읽지 못했습니다. 위 칸에 직접 입력해 주세요.', 'err'); });
+  });
+  function runInbody() {
+    var c = cfg();
+    var v = { sex: $('#cSex').value || c.sex, height: num($('#cHeight').value) || c.height || 170, weight: num($('#ibW').value),
+      smm: num($('#ibSmm').value) || 0, bfm: num($('#ibBfm').value) || 0, pbf: num($('#ibPbf').value) || 0, bmr: num($('#ibBmr').value) || 0 };
+    var a = ibAnalyze(v);
+    if (!a) { ibSay('체중과 체지방량(또는 체지방률)은 꼭 있어야 분석할 수 있어요.', 'err'); renderInbody(null); return; }
+    renderInbody(a, today());
+    if (S.cfg) {
+      var t = today();
+      S.days[t] = Object.assign({ date: t }, S.days[t] || {}, { inbody: { weight: a.weight, smm: a.smm, bfm: a.bfm, pbf: a.pbf, bmr: a.bmr } });
+      if (S.days[t].weight == null) S.days[t].weight = a.weight;
+      save(); renderAll(); fillCheck();
+      ibSay('분석 결과를 오늘 기록에 저장했어요. 아래 코칭 질문에도 들어갑니다.', 'on');
+    } else ibSay('분석했어요. 목표 문진표를 채우고 코칭 시작을 누르면 결과가 기록에 저장됩니다.', 'on');
+  }
+  $('#ibGo').addEventListener('click', runInbody);
 
   // ---------- 이벤트 ----------
   $('#cf').addEventListener('submit', function (ev) {
@@ -1276,6 +1429,7 @@
 
   // ---------- 시작 ----------
   load(); fillForm(); fillCheck(); renderAll();
+  (function () { var ib = (S.days[today()] || {}).inbody; if (!ib) return; $('#ibW').value = ib.weight; $('#ibSmm').value = ib.smm; $('#ibBfm').value = ib.bfm; $('#ibPbf').value = ib.pbf; $('#ibBmr').value = ib.bmr; runInbody(); })();
   fetch('journey.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; })
     .then(function (j) { S.journey = j; renderShowcase(); }).catch(function () {});
 })();
